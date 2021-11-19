@@ -1,24 +1,37 @@
+
+//import needed for checking time
 import isel.leic.utils.Time
 
+/**
+ * Receives a key pressed in the Hardware.
+ * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
+ */
+object KBD {
 
-object KBD { // Ler teclas. Métodos retornam ‘0’..’9’,’#’,’*’ ou NONE.
+    //Variable initialization
+    private const val READ_MASK = 0x0F  //Mask to read a key.
+    private const val DVAL_MASK = 0x10  //Mask to check if a key is valid.
+    private const val ACK = 0x80        //Acknowledge to send if a key is received.
+    private const val NONE = 0.toChar() //Value that represents a non-existent key.
 
-    private const val READ_MASK = 0x0F
-    private const val DVAL_MASK = 0x10
-    private const val ACK = 0x01
-    private const val NONE = 0;
+    //keys that we can expect to read from the matrix keyboard (iterated by columns).
+    private val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#')
 
-    private val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6','9','#')
-
-    // Inicia a classe
+    /**
+     * Initializes the class and clears the ACK in case it is set to One.
+     */
     fun init() {
         HAL.clrBits(ACK)
     }
 
-    // Retorna de imediato a tecla premida ou NONE se não há tecla premida.
-    fun getKey(): Char {
+    /**
+     * Function that translates the code of a pressed key to char if it is been immediately
+     * pressed or [NONE] if it isn't.
+     * @return The translated key or [NONE] if it isn't pressed.
+     */
+    private fun getKey() :Char {
 
-        if (HAL.isBit(DVAL_MASK)) {
+        return if (HAL.isBit(DVAL_MASK)) {
 
             val keyToCheck = HAL.readBits(READ_MASK)
             HAL.setBits(ACK)
@@ -26,36 +39,43 @@ object KBD { // Ler teclas. Métodos retornam ‘0’..’9’,’#’,’*’ o
             while(HAL.isBit(DVAL_MASK));
             HAL.clrBits(ACK)
 
-            return keys[keyToCheck]
-        }
-        else return NONE.toChar()
+            keys[keyToCheck]
+        } else NONE
 
     }
 
-    // Retorna quando a tecla for premida ou NONE após decorrido ‘timeout’ milisegundos.
-    fun waitKey(timeout: Long): Char {
+    /**
+     * Function that waits a certain [timeout] for a key.
+     * @param timeout Time to wait in milliseconds.
+     * @return The key or [NONE] if during [timeout] any was pressed.
+     */
+    fun waitKey(timeout :Long): Char {
         //time reference
-        val timeSince1970 = Time.getTimeInMillis()   // tempo desde 1970 em milisegumdos
-        //timeout value
-        val time = timeout + timeSince1970
+        val timeSince1970 = Time.getTimeInMillis()   //time since January 1st 1970 in milliseconds
+        //time that we can wait for receiving a valid key
+        val waitTime = timeout + timeSince1970
 
-        while (time > Time.getTimeInMillis()) {
+        while (waitTime > Time.getTimeInMillis()) {
             val key = getKey()
-            if(key != NONE.toChar())
+            if(key != NONE)
                 return key
         }
         //timeout
-        return NONE.toChar()
+        return NONE
     }
 
 }
 
+
+/**
+ * Main function for testing the class.
+ */
 fun main() {
-    //criar uma main de testes para a class
     HAL.init()
     KBD.init()
+
     while (true) {
-        println(KBD.getKey())
+        println(KBD.waitKey(100))
         Time.sleep(1000)
         println(KBD.waitKey(100))
     }
