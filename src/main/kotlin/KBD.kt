@@ -76,7 +76,7 @@ fun main() {
 
     while (true) {
         println(KBD.waitKey(100))
-        Time.sleep(1000)
+        Time.sleep(10)
         println(KBD.waitKey(100))
     }
 }

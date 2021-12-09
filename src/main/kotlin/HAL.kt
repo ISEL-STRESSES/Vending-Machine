@@ -29,7 +29,7 @@ object  HAL {
     fun isBit(mask: Int) :Boolean {
         require(mask.countOneBits() == 1) { "Mask can only have one set bit" }
         val readBit = readBits(mask)
-        return readBit == 1
+        return readBit != 0
     }
 
 
@@ -91,7 +91,7 @@ fun main() {
     println("if bit 2 to the power 2 is true -> ${HAL.isBit(0x04)}")                            //DONE
     println("if bit 2 to the power 3 is false -> ${HAL.isBit(0x08)}")                           //DONE
     //Will trow an expected exception
-    println("Should print \"Mask can only have one set bit\" and prints -> ${HAL.isBit(0x03)}") //DONE
+//    println("Should print \"Mask can only have one set bit\" and prints -> ${HAL.isBit(0x03)}") //DONE
 
     println("Expected -> 18, real ->${HAL.writeBits(0x3c,0x18)}")                          //DONE
 
