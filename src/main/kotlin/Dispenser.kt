@@ -5,8 +5,8 @@ object Dispenser { // Controla o estado do mecanismo de dispensa.
 
     }
     // Envia comando para dispensar uma unidade de um produto
-    fun dispense(productid: Int) {
-
+    fun dispense(productId: Int) {
+        SerialEmitter.send(SerialEmitter.Destination.DISPENSER,productId)
     }
 
 }

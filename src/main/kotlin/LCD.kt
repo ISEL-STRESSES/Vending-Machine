@@ -152,12 +152,14 @@ object LCD {
  * Main function for testing the class.
  */
 fun main () {
+
     HAL.init()
+    SerialEmitter.init()
     KBD.init()
     LCD.init()
-    LCD.cursor(1, 2)
-    LCD.write("Hello Word!!")
-    Time.sleep(2000)
-    LCD.clear()
-    LCD.write("Bora meus putos, bora lá, deixa ver o limite  de caracteres") // referencia a fixol21
+    //LCD.cursor(1, 2)
+    //LCD.write("Hello Word!!")
+    //Time.sleep(2000)
+    //LCD.clear()
+    //LCD.write("Bora meus putos, bora lá, deixa ver o limite  de caracteres") // referencia a fixol21
 }

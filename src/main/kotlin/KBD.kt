@@ -21,6 +21,7 @@ object KBD {
      * Initializes the class and clears the ACK in case it is set to One.
      */
     fun init() {
+        HAL.init()
         HAL.clrBits(ACK)
     }
 
