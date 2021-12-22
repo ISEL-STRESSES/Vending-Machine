@@ -19,16 +19,16 @@ object LCD {
     private var LCD_STATE = false                       //Current State of LCD(if it was already initialized).
 
     //Initialization sequence for LCD.
-    private const val DATA_INIT = 0x3                  //First 3 mensagens of data to send.
-    private const val FIRST_WAIT_TIME = 16L            //Firts wait time.
+    private const val DATA_INIT = 0x3                  //First 3 messages of data to send.
+    private const val FIRST_WAIT_TIME = 16L            //First wait time.
     private const val SECOND_WAIT_TIME = 5L            //Second wait time.
     private const val LAST_WAIT_TIME = 10L             //Last wait time (we needed to be more than 5.48ms).
-    private const val DISPLAY_ON = 0x01                //Display on.
+    private const val DISPLAY_ON = 0x0F                //Display on.
     private const val DISPLAY_OFF = 0x08               //Display off.
     private const val ENTRY_MODE_SET = 0x06            //Entry mode set.
     private const val DISPLAY_CLEAR = 0x01             //Clears the display.
     private const val LINES_AND_FONT = 0x28            //Specify the number of display lines and character font.
-    private const val SET_FOR_BIT_INTERFACE = 0x20     //Sets the interface to 4 bit length.
+    private const val SET_FOR_BIT_INTERFACE = 0x2     //Sets the interface to 4 bit length.
 
     /**
      * Function that implements a Serial communication protocol.
@@ -69,7 +69,6 @@ object LCD {
         else writeNibbleParallel(rs,data)
     }
 
-
     /**
      * Function that writes a byte of data for writing or commands in the LCD.
      * @param rs Register Select to chose if [data] is written in
@@ -81,7 +80,6 @@ object LCD {
         writeNibble(rs, data)            //write low
     }
 
-
     /**
      * Function that writes a command in the LCD.
      * @param data Data to be written in IR.
@@ -90,7 +88,6 @@ object LCD {
         writeByte(!REGISTER_SELECT, data)
     }
 
-
     /**
      * Function that writes a data in the LCD.
      * @param data Data to be written in DR.
@@ -98,7 +95,6 @@ object LCD {
     fun writeDATA(data: Int) {
         writeByte(REGISTER_SELECT, data)
     }
-
 
     /**
      * Function that initializes the LCD for communication at 4 bit rate.
@@ -120,7 +116,7 @@ object LCD {
         writeNibble(!REGISTER_SELECT, DATA_INIT)
             //From this moment BF (busy flag) can be read.
 
-        writeCMD(SET_FOR_BIT_INTERFACE)
+        writeNibble(!REGISTER_SELECT, SET_FOR_BIT_INTERFACE)
             //From this moment the Interface is set to four bits.
 
         // 4 bit data interface ------------
@@ -134,7 +130,6 @@ object LCD {
         LCD_STATE = true
 
     }
-
 
     /**
      * Function that writes a character in current position.
@@ -156,7 +151,6 @@ object LCD {
         }
     }
 
-
     /**
      * Function that sends a command for positioning the cursor to [line] and [column] coordinates.
      *
@@ -174,7 +168,6 @@ object LCD {
         //Command to place the cursor in the right place.
         writeCMD(SET_CGRAM_ADDRESS or cursor)
     }
-
 
     /**
      * Function that sends a command for cleaning the cursor (places implicitly the cursor in position(0, 0)).
