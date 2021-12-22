@@ -13,7 +13,7 @@ object KBD {
     private const val DVAL_MASK = 0x10  //Mask to check if a key is valid.
     private const val ACK = 0x80        //Acknowledge to send if a key is received.
     private const val NONE = 0.toChar() //Value that represents a non-existent key.
-
+    private var KBD_STATE = false       //Current State of KBD(if it was already initialized).
     //keys that we can expect to read from the matrix keyboard (iterated by columns).
     private val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#')
 
@@ -21,12 +21,14 @@ object KBD {
      * Initializes the class and clears the ACK in case it is set to One.
      */
     fun init() {
+        if (KBD_STATE) return
         HAL.init()
         HAL.clrBits(ACK)
+        KBD_STATE = true
     }
 
     /**
-     * Function that translates the code of a pressed key to char if it is been immediately
+     * Function that translates the code of a pressed key to char if it is been immediately.
      * pressed or [NONE] if it isn't.
      * @return The translated key or [NONE] if it isn't pressed.
      */
@@ -40,7 +42,11 @@ object KBD {
             while(HAL.isBit(DVAL_MASK));
             HAL.clrBits(ACK)
 
+            if(keyToCheck !in (0..12))
+                return NONE
+
             keys[keyToCheck]
+
         } else NONE
 
     }
@@ -76,8 +82,8 @@ fun main() {
     KBD.init()
 
     while (true) {
-        println(KBD.waitKey(100))
-        Time.sleep(10)
-        println(KBD.waitKey(100))
+        println(KBD.waitKey(1000))
+
+        println(KBD.waitKey(1000))
     }
 }

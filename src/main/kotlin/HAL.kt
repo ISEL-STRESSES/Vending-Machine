@@ -11,13 +11,16 @@ object  HAL {
     //Variable initialization
     //value that will be manipulated for the output value.
     private var outputValue = 0x00      //Initial value of output
+    private var HAL_STATE = false       //Current State of HAL(if it was already initialized).
 
     /**
      * Initializes the class by writing the default [outputValue] into the hardware for it's reset.
      */
     fun init(){
+        if (HAL_STATE) return
         val fullMask = 0xFF
         writeBits(fullMask, outputValue)
+        HAL_STATE = true
     }
 
 

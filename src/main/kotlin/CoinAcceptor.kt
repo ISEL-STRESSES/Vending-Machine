@@ -1,9 +1,16 @@
 
-
+/**
+ * Interface used for communication with the Coin acceptor.
+ * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
+ */
 object CoinAcceptor { // Implementa a interface com o moedeiro.
+    private var COIN_ACCEPTOR_STATE = false
+
     // Inicia a classe
     fun init() {
-
+        if (COIN_ACCEPTOR_STATE) return
+        //...
+        COIN_ACCEPTOR_STATE = true
     }
 
     // Retorna true se foi introduzida uma nova moeda.
