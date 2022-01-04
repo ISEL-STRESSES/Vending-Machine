@@ -81,6 +81,7 @@ fun main() {
     HAL.init()
     KBD.init()
 
+    //We press 2 two random keys (2, 4)
     while (true) {
         println(KBD.waitKey(1000))
 

@@ -23,7 +23,6 @@ object  HAL {
         HAL_STATE = true
     }
 
-
     /**
      * Function that verifies if a bit is One or Zero based on a specific [mask].
      * @param mask Mask to check if a bit is One or Zero.
@@ -66,7 +65,6 @@ object  HAL {
         outputValue = outputValue or mask
         UsbPort.out(outputValue.inv())
     }
-
 
     /**
      * Function that sets the bits corresponding to the One's in [mask] to the logic value Zero.

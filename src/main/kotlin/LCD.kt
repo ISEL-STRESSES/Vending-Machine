@@ -28,7 +28,7 @@ object LCD {
     private const val ENTRY_MODE_SET = 0x06            //Entry mode set.
     private const val DISPLAY_CLEAR = 0x01             //Clears the display.
     private const val LINES_AND_FONT = 0x28            //Specify the number of display lines and character font.
-    private const val SET_FOR_BIT_INTERFACE = 0x2     //Sets the interface to 4 bit length.
+    private const val SET_FOUR_BIT_INTERFACE = 0x2     //Sets the interface to 4 bit length.
 
     /**
      * Function that implements a Serial communication protocol.
@@ -116,7 +116,7 @@ object LCD {
         writeNibble(!REGISTER_SELECT, DATA_INIT)
             //From this moment BF (busy flag) can be read.
 
-        writeNibble(!REGISTER_SELECT, SET_FOR_BIT_INTERFACE)
+        writeNibble(!REGISTER_SELECT, SET_FOUR_BIT_INTERFACE)
             //From this moment the Interface is set to four bits.
 
         // 4 bit data interface ------------
