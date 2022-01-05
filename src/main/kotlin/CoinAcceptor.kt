@@ -12,9 +12,10 @@ object CoinAcceptor {
     private const val COIN_EJECT_MASK = 0x40        // Mask to write the Eject Signal to the Coin Acceptor hardware component.
     private const val WAIT_TIME = 1000L             // Time to maintain Eject and Collect signal commands.
     private var COIN_ACCEPTOR_STATE = false         // Current State of Coin Acceptor class (if it was already initialized).
+
     //Extra------------------
     private var COINS_ACCEPTED = 0
-    private val COINS_DEPOSIT_MAX_CAPACITY = 50
+    private const val COINS_DEPOSIT_MAX_CAPACITY = 10
 
     /**
      * Function that initializes the class of the Coin Acceptor.
@@ -38,7 +39,7 @@ object CoinAcceptor {
 
 
     /**
-     * Function that informs the Coin Acceptor that the coin was aconted for.
+     * Function that informs the Coin Acceptor that the coin was accounted for.
      */
     fun acceptCoin() {
         if (depositFull()) return
@@ -67,6 +68,7 @@ object CoinAcceptor {
      * Function that sends a command to the coin Acceptor to store all coins.
      */
     fun collectCoins() {
+        if(depositFull()) return
         HAL.setBits(COIN_COLLECT_MASK)
         //time needed to maintain the collect signal.
         Time.sleep(WAIT_TIME)
@@ -75,7 +77,7 @@ object CoinAcceptor {
 
     //Extra(might need some care)-----------------
     fun depositFull() :Boolean {
-        return COINS_ACCEPTED > COINS_DEPOSIT_MAX_CAPACITY
+        return COINS_ACCEPTED >= COINS_DEPOSIT_MAX_CAPACITY
     }
 
     fun emptyDepositRequest() :String? {
@@ -94,9 +96,9 @@ fun main() {
             CoinAcceptor.acceptCoin()
             coins++
         }
-        if (coins >= 5)
+        if (coins % 5 == 0)
             CoinAcceptor.collectCoins()
     }
-    println(CoinAcceptor.emptyDepositRequest() != null)
+    println(CoinAcceptor.emptyDepositRequest())
 
 }
