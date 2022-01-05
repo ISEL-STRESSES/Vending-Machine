@@ -41,7 +41,7 @@ object  HAL {
      * @return The bits in the input USB Port passed by [mask].
      */
     fun readBits(mask: Int) :Int{
-        val input = UsbPort.`in`().inv()
+        val input = USBPortIn()
         return input and mask
     }
 
@@ -53,7 +53,7 @@ object  HAL {
     fun writeBits(mask: Int, value:Int) {
         outputValue = outputValue and mask.inv()
         outputValue = outputValue or (mask and value)
-        UsbPort.out(outputValue.inv())
+        USBPortOut(outputValue)
 
     }
 
@@ -63,7 +63,7 @@ object  HAL {
      */
     fun setBits(mask: Int) {
         outputValue = outputValue or mask
-        UsbPort.out(outputValue.inv())
+        USBPortOut(outputValue)
     }
 
     /**
@@ -72,7 +72,17 @@ object  HAL {
      */
     fun clrBits(mask: Int){
         outputValue = (outputValue and mask.inv())
-        UsbPort.out(outputValue.inv())
+        USBPortOut(outputValue)
+    }
+
+
+    //Extras-------------------
+    private fun USBPortOut(value: Int){
+        UsbPort.out(value.inv())
+    }
+
+    private fun USBPortIn() : Int{
+        return UsbPort.`in`().inv()
     }
 
 }

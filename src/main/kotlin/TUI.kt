@@ -4,7 +4,8 @@
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
  */
 object TUI {
-
+    private const val REFILL ='#'
+    private const val OPTION_CONSULTA_algo = '*'
     private var TUI_STATE = false //
 
     /**
@@ -19,6 +20,23 @@ object TUI {
         //...
         TUI_STATE = true
     }
+
+    fun showProduct() {
+
+    }
+    //repositions the cursor because limit of characters
+    fun repositionCursor() {
+
+    }
+
+    fun printText() {
+
+    }
+
+    fun clearLine() {
+
+    }
+
 
 }
 

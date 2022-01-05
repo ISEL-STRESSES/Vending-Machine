@@ -24,7 +24,7 @@ object CoinAcceptor {
     fun init() {
         if (COIN_ACCEPTOR_STATE) return
         HAL.init()
-        //preciso de limpar o porto de saida por causa dos sinais accept collect eject ?
+        //preciso de limpar o porto de saida por causa dos sinais accept collect eject?
         //no init do HAL eles sao todos limpos! é suficiente?
         COIN_ACCEPTOR_STATE = true
     }
