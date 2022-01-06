@@ -8,7 +8,7 @@ object LCD {
 
     //Variable initialization
     private const val LINES = 2                         //Number of lines available for data printing in display.
-    private const val COLUMNS = 16                      //Number of columns available for data printing in display.
+    const val COLUMNS = 16                              //Number of columns available for data printing in display.
     private const val WRITE_MASK = 0x0F                 //Mask needed for sending data to the display.
     private const val REGISTER_SELECT = true            //Resister Select value in boolean.
     private const val REGISTER_SELECT_BIT = 0x10        //Bit of Register Select in the byte.
@@ -143,10 +143,10 @@ object LCD {
      * Function that writes an entire String in current position.
      * @param text String to be written.
      */
-    fun write(text: String) {
+    fun write(text: String, aesthetics: Boolean = false) {
         for (i in text){
             //writes letter by letter with time gap for aesthetics.
-            Time.sleep(125)
+            if (aesthetics) Time.sleep(125)
             write(i)
         }
     }
@@ -166,7 +166,8 @@ object LCD {
         if (line == 1)
             cursor += LINE_CELLS
         //Command to place the cursor in the right place.
-        writeCMD(SET_CGRAM_ADDRESS or cursor)
+        //writeCMD(SET_CGRAM_ADDRESS or cursor)
+        setCGRAMaddress(cursor)
     }
 
     /**
@@ -174,6 +175,15 @@ object LCD {
      */
     fun clear() {
         writeCMD(DISPLAY_CLEAR)
+    }
+
+    //Extra----------------
+    fun setDDRAMAddress(address: Int) {
+        writeCMD((1 shl 7) or address)
+    }
+
+    fun setCGRAMaddress(address: Int) {
+        writeCMD(SET_CGRAM_ADDRESS or address)
     }
 
 }
@@ -187,9 +197,9 @@ fun main () {
     SerialEmitter.init()
     LCD.init()
     LCD.cursor(1, 2)
-    LCD.write("Hello Word!!")
+    LCD.write("Hello Word!!", true)
     Time.sleep(2000)
     LCD.clear()
     //Writes part of the phrase as intended (in both lines).
-    LCD.write("Let's go people,lets us see the character limits in this Liquid Cristal Display.")
+    LCD.write("Let's go people,lets us see the character limits in this Liquid Cristal Display.", true)
 }

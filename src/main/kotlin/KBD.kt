@@ -15,7 +15,7 @@ object KBD {
     private const val NONE = 0.toChar() //Value that represents a non-existent key.
     private var KBD_STATE = false       //Current State of KBD(if it was already initialized).
     //keys that we can expect to read from the matrix keyboard (iterated by columns).
-    private val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#')
+    val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#')
 
     /**
      * Initializes the class and clears the ACK in case it is set to One.
