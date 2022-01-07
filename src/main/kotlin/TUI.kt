@@ -6,7 +6,7 @@
 object TUI {
     //£$€₿♫
     private const val REFILL ='#'
-    private const val OPTION_CONSULTA_algo = '*'
+    private const val OPTION_CONSULTA = '*'
     private const val LINE_SIZE = 64
     private var TEXT_LCD = ""
     private val TIME_OUT = 1000L
@@ -26,19 +26,18 @@ object TUI {
         TUI_STATE = true
     }
 
-    fun showProduct(array: Array<Products.Product>, direction: Int) {
-        printText(productSelection(array, insertInt(TIME_OUT), direction).name,Position.CENTER, 0)
-        printText(productSelection(array, insertInt(TIME_OUT), direction).id.toString(),Position.LEFT,1)
-        printText(productSelection(array, insertInt(TIME_OUT), direction).quantity.toString(),Position.CENTER,1)
-        printText(productSelection(array, insertInt(TIME_OUT), direction).price.toString(),Position.RIGHT,1)
-
+    fun showProduct(array: Array<Products.Product>) {
+        printText(productSelection(array, insertInt(TIME_OUT)).name,Position.CENTER, 0)
+        printText(productSelection(array, insertInt(TIME_OUT)).id.toString(),Position.LEFT,1)
+        printText(productSelection(array, insertInt(TIME_OUT)).quantity.toString(),Position.CENTER,1)
+        printText(productSelection(array, insertInt(TIME_OUT)).price.toString(),Position.RIGHT,1)
     }
 
 
     /**
      *
      */
-    fun printText(text: String, position: Position, line: Int) {
+    fun printText(text: String, position: Position = Position.LEFT, line: Int) {
         val textSize = text.length
         when (position) {
             Position.CENTER -> {
@@ -65,14 +64,21 @@ object TUI {
         }
     }
 
-    private fun productSelection(products: Array<Products.Product>, currentIndex :Int = 0, direction: Int) : Products.Product{
+    private fun productSelection(products: Array<Products.Product>, currentIndex :Int = 0) : Products.Product{
         var index = currentIndex
-        return when (direction) {
-            8 -> products[--index]
-            2 -> products[++index]
-            else -> products[index]
+        val selector = KBD.waitKey(TIME_OUT)
+        if(selector == OPTION_CONSULTA) {
+            val direction = KBD.waitKey(TIME_OUT)
+
+            return when (direction.toInt()) {
+                8 -> products[--index]
+                2 -> products[++index]
+                else -> products[index]
+            }
         }
+        return products[currentIndex]
     }
+
 
     private fun insertInt(timeout: Long): Int {
         var value = 0
@@ -98,4 +104,8 @@ fun main() {
     LCD.init()
     KBD.init()
     TUI.init()
+    TUI.printText("darta-cao",line = 0)
+    TUI.printText("Julieta",TUI.Position.CENTER,1)
+    TUI.printText("BZ",line = 0)
+
 }
