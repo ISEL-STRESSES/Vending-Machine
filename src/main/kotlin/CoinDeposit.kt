@@ -2,7 +2,7 @@ object CoinDeposit {
 
     data class Coin(var count: Int, val date:String,val time:String)
 
-    var coinsStored = vendingCoins()
+    var COINS_LOG = vendingCoins()
 
 
     private const val COINS_DEPOSIT_MAX_CAPACITY = 10
@@ -11,7 +11,7 @@ object CoinDeposit {
         FileAccess.init()
     }
 
-    fun vendingCoins() :Array<Coin>{
+    private fun vendingCoins() :Array<Coin>{
         val file = FileAccess.readCoinFile()
         val coins = Array(file.size){
             val coins = file[it].split(';')
@@ -19,7 +19,8 @@ object CoinDeposit {
         }
         return coins
     }
-    fun depositFull() :Boolean {
+
+    private fun depositFull() :Boolean {
         return CoinAcceptor.COINS_ACCEPTED >= COINS_DEPOSIT_MAX_CAPACITY
     }
 

@@ -26,15 +26,16 @@ object FileAccess {
         writer.close()
     }
 
-    fun writeCoinLog(array: Array<CoinDeposit.Coin>, date:String, time: String) {
+    fun writeCoinLog(array: Array<CoinDeposit.Coin>, date: String, time: String, coin: Int) {
         val writer = createWriter(COIN_LOG)
-        val last = array.takeLast(1)
         if (array.size > 1)
             array.forEach {
-                writer.println(it)
-                println(it)
+                val coins = "${it.count};${it.date};${it.time}"
+                writer.println(coins)
+                println(coins)
             }
-        val lastLine = "$last;$date;$time"
+
+        val lastLine = "${coin};$date;$time"
         writer.println(lastLine)
         println(lastLine)
 

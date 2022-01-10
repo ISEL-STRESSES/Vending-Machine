@@ -6,7 +6,7 @@ enum class OPERATING_MODE { MAINTENANCE, DISPENSE }
 
 val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm")
 
-
+val coin = 30
 fun Products.Product.addQuantity(quantity: Int): Products.Product {
     return this.copy(quantity = quantity)
 }
@@ -46,6 +46,6 @@ fun main() {
     CoinDeposit.init()
     FileAccess.init()
     var mode = OPERATING_MODE.DISPENSE
-    printTime(mode)
-    M.printsSystemOut(Products.products,CoinDeposit.coinsStored,formatter.format(Time.getTimeInMillis()))
+    //printTime(mode)
+    M.printsSystemOut(Products.products,CoinDeposit.COINS_LOG,coin,formatter.format(Time.getTimeInMillis()))
 }
