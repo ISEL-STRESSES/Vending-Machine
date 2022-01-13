@@ -4,13 +4,13 @@
 4;Skittles;5;4
 5;Oreo;5;5
 6;Chips-Ahoy;12;5
-7;Gomas;4;3
-8;Sandes de queijo;3;2
-9;Sandes de fiambre;4;2
-10;Sandes mista;3;3
+7;Candies;4;3
+8;Cheese Sandwich;3;2
+9;Ham Sandwich;4;2
+10;Club Sandwich;3;3
 11;Fantastic;7;5
 12;Coca-Cola;9;5
 13;Pepsi;14;5
-14;Agua;6;1
-15;Agua;13;1
-16;Compal;7;2
+14;Water;6;1
+15;Water;13;1
+16;Natual Juice;7;2

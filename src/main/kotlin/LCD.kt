@@ -135,7 +135,7 @@ object LCD {
      * Function that writes a character in current position.
      * @param c Char to be written.
      */
-    private fun write(c: Char) {
+    fun write(c: Char) {
         writeDATA(c.code)
     }
 

@@ -24,4 +24,8 @@ object Products {
         FileAccess.writeProductFile(array)
     }
 
+    fun Product.addQuantity(quantity: Int): Products.Product {
+        return this.copy(quantity = this.quantity + quantity)
+    }
+
 }

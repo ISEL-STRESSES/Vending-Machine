@@ -1,3 +1,7 @@
+import java.io.BufferedReader
+import java.io.FileReader
+import java.io.PrintWriter
+
 object FileAccess {
     private const val COIN_LOG = "CoinDeposit.txt"
     private const val PRODUCTS_LOG = "Products.txt"
@@ -50,6 +54,14 @@ object FileAccess {
             lines += line ?: break
         }
         return lines
+    }
+
+    private fun createReader(fileName: String): BufferedReader {
+        return BufferedReader(FileReader(fileName))
+    }
+
+    private fun createWriter(fileName: String): PrintWriter {
+        return PrintWriter(fileName)
     }
 
 }

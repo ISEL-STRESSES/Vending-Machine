@@ -3,7 +3,7 @@ package vendingmachine.simul
 usbport = UsbPort
 
 # Generic modules to activate from Simulator
-kbd  = Keyboard("123456789*0#",4,3,1)
+kbd  = Keyboard("123456789*0#",4,3,0)
 lcd  = LCD
 m    = Switch ; "manut" ; setLabel("M")
 
@@ -36,7 +36,7 @@ kb.DAC          -> kbd.ack
 usbport.O0 -> sr.SDX
 usbport.O1-> sr.SCLK
 dp.done -> sr.accept
-sr.busy -> usbport.I7
+sr.busy -> usbport.I6
 
 # Dispatcher
 sr.DXval -> dp.Dval

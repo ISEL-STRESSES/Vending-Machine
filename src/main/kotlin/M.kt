@@ -1,4 +1,6 @@
 object M {
+    //duvida como por o modulo m a falar unica e exclusivamente com a app.
+    //neste mommento o modulo esta a falar com o File Access saltando todos os outros modulos.
 
     private const val M_MASK = 0x80
     private var M_STATE = false
@@ -7,15 +9,6 @@ object M {
         if (M_STATE) return
         HAL.init()
         M_STATE = true
-    }
-    /**
-     * Function that saves the products and its properties as well as the number of coins introduced during functioning.
-     *
-     */
-    fun printsSystemOut(array: Array<Products.Product>, coins: Array<CoinDeposit.Coin>, coin:Int, loge: String){
-        val data = loge.split(' ')
-        FileAccess.writeCoinLog(coins,data.first(),data.last(),coin)
-        FileAccess.writeProductFile(array)
     }
 
     fun setMaintenance(): Boolean{

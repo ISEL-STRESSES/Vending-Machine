@@ -8,8 +8,9 @@ object TUI {
     private const val REFILL ='#'
     private const val OPTION_CONSULTA = '*'
     private const val LINE_SIZE = 64
-    private var TEXT_LCD = ""
-    private val TIME_OUT = 1000L
+    private const val KEY_UP = 2
+    private const val KEY_DOWN = 8
+    private const val TIME_OUT = 1000L
     private var TUI_STATE = false //
     enum class Position {CENTER, LEFT, RIGHT}
 
@@ -26,11 +27,19 @@ object TUI {
         TUI_STATE = true
     }
 
-    fun showProduct(array: Array<Products.Product>) {
-        printText(productSelection(array, insertInt(TIME_OUT)).name,Position.CENTER, 0)
-        printText(productSelection(array, insertInt(TIME_OUT)).id.toString(),Position.LEFT,1)
-        printText(productSelection(array, insertInt(TIME_OUT)).quantity.toString(),Position.CENTER,1)
-        printText(productSelection(array, insertInt(TIME_OUT)).price.toString(),Position.RIGHT,1)
+    fun printProduct(product: Products.Product) {
+        clearLCD()
+
+        if (product.quantity <= 0) {
+            printText("Product ${product.id}", Position.CENTER, 0)
+            printText("not available", Position.CENTER, 1)
+            println(product)
+        }
+
+        printText(product.name,Position.CENTER, 0)
+        printText(product.id.toString().padStart(2,'0'),Position.LEFT,1)
+        printText("#" +product.quantity.toString().padStart(2,'0'),Position.CENTER,1)
+        printText(product.price.toString().padStart(2,'0'),Position.RIGHT,1)
     }
 
 
@@ -39,9 +48,10 @@ object TUI {
      */
     fun printText(text: String, position: Position = Position.LEFT, line: Int) {
         val textSize = text.length
+        val middle = LCD.COLUMNS/2 - textSize/2
         when (position) {
             Position.CENTER -> {
-                LCD.cursor(line, LCD.COLUMNS/2 - textSize/2)
+                LCD.cursor(line,if (textSize % 2 == 0) middle else middle /*-1*/)
                 LCD.write(text,false)
             }
             Position.RIGHT -> { //TODO("MAIS BONITA")
@@ -58,29 +68,34 @@ object TUI {
     /**
      *
      */
-    fun clearLine() {
+    private fun clearLine(line:Int) {
         repeat(LINE_SIZE) {
+            LCD.cursor(line,it-1)
             LCD.write(" ", false)
         }
     }
 
-    private fun productSelection(products: Array<Products.Product>, currentIndex :Int = 0) : Products.Product{
-        var index = currentIndex
-        val selector = KBD.waitKey(TIME_OUT)
-        if(selector == OPTION_CONSULTA) {
-            val direction = KBD.waitKey(TIME_OUT)
+    fun clearLCD(){
+        clearLine(0)
+        clearLine(1)
+    }
 
-            return when (direction.toInt()) {
-                8 -> products[--index]
-                2 -> products[++index]
+    fun browseProducts(products: Array<Products.Product>, currentIndex :Int = 0) : Products.Product{
+        var index = currentIndex
+        //val selector = KBD.waitKey(TIME_OUT)
+        //if(selector == OPTION_CONSULTA) {
+
+            return when (getInt(TIME_OUT)) {
+                KEY_DOWN -> if (index - 1 in products.indices)products[--index] else products[index]
+                KEY_UP -> if (index + 1 in products.indices)products[++index] else products[index]
                 else -> products[index]
             }
-        }
-        return products[currentIndex]
+        //}
+        //return products[currentIndex]
     }
 
 
-    private fun insertInt(timeout: Long): Int {
+    fun getInt(timeout: Long): Int {
         var value = 0
         val intToInsert = KBD.waitKey(timeout)
 
@@ -91,6 +106,10 @@ object TUI {
         if (newInt in (KBD.keys.filter { it != '#' && it != '*' }))
             value = (value shl 1) or newInt.toInt()
         return value
+    }
+
+    fun getKBDKey(timeOut: Long = TIME_OUT):Char {
+        return KBD.waitKey(timeOut)
     }
 
 }
