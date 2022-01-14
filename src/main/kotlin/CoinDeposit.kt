@@ -1,7 +1,7 @@
 object CoinDeposit {
 
     data class Coin(var count: Int, val date:String,val time:String)
-
+    var COINS :Int = 0
     var COINS_LOG = vendingCoins()
 
 
@@ -9,6 +9,8 @@ object CoinDeposit {
 
     fun init() {
         FileAccess.init()
+        COINS = vendingCoins().last().count
+
     }
 
     private fun vendingCoins() :Array<Coin>{
@@ -21,7 +23,7 @@ object CoinDeposit {
     }
 
     private fun depositFull() :Boolean {
-        return CoinAcceptor.COINS_ACCEPTED >= COINS_DEPOSIT_MAX_CAPACITY
+        return COINS >= COINS_DEPOSIT_MAX_CAPACITY
     }
 
     fun emptyDepositRequest() :String? {

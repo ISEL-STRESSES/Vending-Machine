@@ -5,16 +5,13 @@ import isel.leic.utils.Time
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
  */
 object CoinAcceptor {
-    //Variable initialization
+    //Variable initialization.
     private const val COIN_READ_MASK = 0x20         // Mask to read if a coin was introduced.
     private const val COIN_ACCEPT_MASK = 0x10       // Mask to write the Accept Signal to the Coin Acceptor hardware component.
     private const val COIN_COLLECT_MASK = 0x20      // Mask to write the Collect Signal to the Coin Acceptor hardware component.
     private const val COIN_EJECT_MASK = 0x40        // Mask to write the Eject Signal to the Coin Acceptor hardware component.
     private const val WAIT_TIME = 1000L             // Time to maintain Eject and Collect signal commands.
     private var COIN_ACCEPTOR_STATE = false         // Current State of Coin Acceptor class (if it was already initialized).
-
-    //Extra------------------
-    var COINS_ACCEPTED = 0
 
     /**
      * Function that initializes the class of the Coin Acceptor.
@@ -23,7 +20,7 @@ object CoinAcceptor {
     fun init() {
         if (COIN_ACCEPTOR_STATE) return
         HAL.init()
-        //preciso de limpar o porto de saida por causa dos sinais accept collect eject?
+        //preciso de limpar o porto de saida nos bits 5 a 7 por causa dos sinais accept collect eject?
         //no init do HAL eles sao todos limpos! é suficiente?
         COIN_ACCEPTOR_STATE = true
     }
@@ -41,11 +38,8 @@ object CoinAcceptor {
      * Function that informs the Coin Acceptor that the coin was accounted for.
      */
     fun acceptCoin() {
-        //if (depositFull()) return
-
         if (hasCoin()) {
             HAL.setBits(COIN_ACCEPT_MASK)
-            COINS_ACCEPTED++
         } else HAL.clrBits(COIN_ACCEPT_MASK)
         HAL.clrBits(COIN_ACCEPT_MASK)
 
@@ -67,18 +61,17 @@ object CoinAcceptor {
      * Function that sends a command to the coin Acceptor to store all coins.
      */
     fun collectCoins() {
-        //if(depositFull()) return
         HAL.setBits(COIN_COLLECT_MASK)
         //time needed to maintain the collect signal.
         Time.sleep(WAIT_TIME)
         HAL.clrBits(COIN_COLLECT_MASK)
     }
 
-    //Extra(might need some care)-----------------
-
-
 }
 
+/**
+ * Main function for testing.
+ */
 fun main() {
     HAL.init()
     CoinAcceptor.init()

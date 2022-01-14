@@ -73,7 +73,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
-    <orderEntry type="library" name="usbPort" level="project" />
     <orderEntry type="library" name="VendingMachine" level="project" />
   </component>
 </module>

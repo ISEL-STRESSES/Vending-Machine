@@ -8,8 +8,6 @@ object TUI {
     private const val REFILL ='#'
     private const val OPTION_CONSULTA = '*'
     private const val LINE_SIZE = 64
-    private const val KEY_UP = 2
-    private const val KEY_DOWN = 8
     private const val TIME_OUT = 1000L
     private var TUI_STATE = false //
     enum class Position {CENTER, LEFT, RIGHT}
@@ -27,6 +25,9 @@ object TUI {
         TUI_STATE = true
     }
 
+    /**
+     *
+     */
     fun printProduct(product: Products.Product) {
         clearLCD()
 
@@ -75,39 +76,45 @@ object TUI {
         }
     }
 
+    /**
+     *
+     */
     fun clearLCD(){
         clearLine(0)
         clearLine(1)
     }
 
-    fun browseProducts(products: Array<Products.Product>, currentIndex :Int = 0) : Products.Product{
-        var index = currentIndex
-        //val selector = KBD.waitKey(TIME_OUT)
-        //if(selector == OPTION_CONSULTA) {
+    /**
+     * TOMAR PARA APP
+     */
+//    fun browseProducts(products: Array<Products.Product>, currentIndex :Int = 0) : Products.Product{
+//        var index = currentIndex
+//        return when (getInt(TIME_OUT)) {
+//            KEY_DOWN -> if (index - 1 in products.indices) products[--index] else products[index]
+//            KEY_UP -> if (index + 1 in products.indices) products[++index] else products[index]
+//            else -> products[index]
+//        }
+//    }
 
-            return when (getInt(TIME_OUT)) {
-                KEY_DOWN -> if (index - 1 in products.indices)products[--index] else products[index]
-                KEY_UP -> if (index + 1 in products.indices)products[++index] else products[index]
-                else -> products[index]
-            }
-        //}
-        //return products[currentIndex]
-    }
-
-
+    /**
+     *
+     */
     fun getInt(timeout: Long): Int {
         var value = 0
         val intToInsert = KBD.waitKey(timeout)
 
         if (intToInsert in (KBD.keys.filter { it != '#' && it != '*' }))
-            value = intToInsert.toInt()
+            value = intToInsert.toString().toInt()
 
         val newInt = KBD.waitKey(timeout)
         if (newInt in (KBD.keys.filter { it != '#' && it != '*' }))
-            value = (value shl 1) or newInt.toInt()
+            value = (value shl 1) or newInt.toString().toInt()
         return value
     }
 
+    /**
+     *
+     */
     fun getKBDKey(timeOut: Long = TIME_OUT):Char {
         return KBD.waitKey(timeOut)
     }

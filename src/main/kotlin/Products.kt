@@ -12,7 +12,7 @@ object Products {
     }
 
     private fun vendingProducts() :Array<Product> {
-        val file = FileAccess.readerProductFile()
+        val file = FileAccess.readProductFile()
         val products = Array(file.size){
             val product = file[it].split(';')
             Product(product[0].toInt(),product[1],product[2].toInt(),product[3].toInt())

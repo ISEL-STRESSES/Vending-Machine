@@ -1,4 +1,3 @@
-
 import Time.secsToTime
 
 object Vending {
@@ -6,10 +5,15 @@ object Vending {
 
     var mode: Operation? = null
     private const val TIME_OUT = 5000L
+    private const val KEY_UP = 2
+    private const val KEY_DOWN = 8
+    private var force = true
+    private val KEY_INTERVAL = ('0'..'9')
 
-    const val coin = 30
 
-
+    /**
+     * Initializes all the Lower Blocks.
+     */
     fun blocksInit() {
         HAL.init()
         SerialEmitter.init()
@@ -25,9 +29,12 @@ object Vending {
     }
 
 
-    fun printInitialMenu() {
+    /**
+     *
+     */
+    fun printInitialMenu(update: Boolean = false) {
         val currentTime = Time.getCurrentTime()
-        if (Time.getCurrentTime() - Time.LAST_TIME >= 60000L) {
+        if ((Time.getCurrentTime() - Time.LAST_TIME >= 60000L) || update) {
 
             Time.LAST_TIME = currentTime
             TUI.printText("Vending Machine ", line = 0)
@@ -36,43 +43,148 @@ object Vending {
 
     }
 
-    fun printTime(currentTime: Long) {
+
+    /**
+     *
+     */
+    private fun printTime(currentTime: Long) {
         TUI.printText(currentTime.secsToTime(), line = 1)
     }
 
-    fun run(mode: Mode) {
-        if (Time.LAST_TIME != Time.getCurrentTime()) {
-            printInitialMenu()
+
+    /**
+     *
+     */
+    fun run(mode: Mode): String? {
+        printInitialMenu(force)
+
+        var pickedProduct:Products.Product? = null
+        var selectedProduct: Products.Product? = null
+
+        if (TUI.getKBDKey(TIME_OUT) == '#')
+            pickedProduct = pickProduct(mode, Products.products)
+
+        if ((TUI.getKBDKey(TIME_OUT) == '#') && (pickedProduct != null)) {
+            selectedProduct = selectProduct(pickedProduct)
         }
 
-        if (TUI.getKBDKey() == '#') {
-            TUI.printProduct(Products.products.first())
-            while (true) {
-                var mode = mode
-                var index = 0
-                val key = TUI.getKBDKey()
+        if (selectedProduct!= null){
+            return sellProduct(selectedProduct)
+        }
+        return null
+    }
 
-                if (key =='*')
-                    mode = if (mode == Mode.ARROWS) Mode.INDEX else Mode.ARROWS
-                else
-                    if (mode == Mode.INDEX)
-                        if (key in  '0'..'9') TUI.printProduct(Products.products[key-'0'-1])
+
+    /**
+     *
+     */
+    private fun pickProduct(mode: Mode, products : Array<Products.Product>): Products.Product? {
+
+        var currentMode = mode
+
+        val firstProduct = products.first { it.quantity > 0 }
+        TUI.printProduct(firstProduct)
+        var index = firstProduct.id
+
+        val key = TUI.getKBDKey(TIME_OUT)
+
+        while (key != KBD.NONE) {
+            var product = firstProduct
+            println(key)
+            when (key){
+                '*' -> currentMode = currentMode.switchMode()
+                '#' -> if (product.quantity > 0) return product
+                in KEY_INTERVAL -> {
+                    if (currentMode == Mode.INDEX) {
+                        product = products[key.toInteger()]
+                        index = product.id
+                    }
                     else {
-                            val browse = TUI.browseProducts(Products.products,index)
-                            index = browse.id+1
-                            TUI.printProduct(browse)
-                            println(browse)
-                        }
+                        product = browseProducts(products,index,key)
+                        index = product.id
+                    }
 
+                }
+            }
+            TUI.printProduct(product)
+        }
+        force = true
+        return null
+    }
+
+
+    /**
+     *
+     */
+    private fun Mode.switchMode(): Mode = if (this == Mode.INDEX) Mode.ARROWS else Mode.INDEX
+
+
+    /**
+     *
+     */
+    private fun browseProducts(products: Array<Products.Product>, currentIndex: Int = 0, key: Char): Products.Product {
+        var index = currentIndex
+        return when (key.toInteger()) {
+            KEY_DOWN -> if (index - 1 in products.indices) products[--index] else products[index]//TODO("CAN MAKE TEH LIST GO AROUND")
+            KEY_UP -> if (index + 1 in products.indices) products[++index] else products[index]
+            else -> products[index]
+        }
+    }
+
+
+    /**
+     *
+     */
+    private fun Char.toInteger(): Int = this - '0'
+
+
+    /**
+     *
+     */
+    private fun selectProduct(product: Products.Product): Products.Product? {
+        throw UnsupportedOperationException()
+    }
+
+
+    /**
+     *
+     */
+    private fun sellProduct(selectedProduct: Products.Product):String? {
+        var coinsInserted = 0
+        while (coinsInserted < selectedProduct.price) {
+            if (TUI.getKBDKey(TIME_OUT) == '#') {
+                TUI.printText("Vending Aborted",TUI.Position.CENTER,0)
+                TUI.printText("Return $coinsInserted",TUI.Position.CENTER,1)
+                CoinAcceptor.ejectCoins()
             }
 
+            if (CoinAcceptor.hasCoin()){
+                CoinAcceptor.acceptCoin()
+                coinsInserted++
+            }
+            if (coinsInserted == selectedProduct.price){
+                Dispenser.dispense(selectedProduct.id)
+                Products.products[selectedProduct.id].quantity--
+                CoinDeposit.COINS +=coinsInserted
+                break
+            }
         }
-        if (M.setMaintenance())
-            return
+        TUI.printText("Collect Product", TUI.Position.CENTER, 0)
+        val depositRequest = CoinDeposit.emptyDepositRequest()
+        if (depositRequest != null){
+            TUI.printText("OUT OF SERVICE", TUI.Position.CENTER, 0)
+            TUI.printText(depositRequest,TUI.Position.CENTER,1)
+            return depositRequest
+        }
+        return null
     }
 
 }
 
+
+/**
+ *
+ */
 fun main() {
     Vending.blocksInit()
     while (true) {

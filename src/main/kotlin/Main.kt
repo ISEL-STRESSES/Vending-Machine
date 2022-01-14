@@ -1,5 +1,7 @@
 enum class Mode {ARROWS, INDEX}
 
+enum class Operation {MAINTENANCE, VENDING, REQUESTS}
+
 /**
  * Runs the Vending machine and its modes.
  */
@@ -7,15 +9,22 @@ fun main() {
     //initializes all the app lower blocks
     Vending.blocksInit()
     Vending.printInitialMenu()
-    Vending.mode = Vending.Operation.VENDING
-    var mode = Mode.INDEX
+    var mode = Operation.VENDING
+    val mode2 = Mode.INDEX
 
     while (true) {
         if (M.setMaintenance()) {
-            Vending.mode = Vending.Operation.MAINTENANCE
-            Maintenance.runMaintenance(mode)
+            mode = Operation.MAINTENANCE
+            Maintenance.runMaintenance(mode2)
         }
-        else Vending.run(mode)
+        else {
+            val request = Vending.run(mode2)
+            if (request != null){
+                mode = Operation.REQUESTS
+
+                //TODO("NOT YET IMPLEMENTED")
+            }
+        }
 
     }
 }
