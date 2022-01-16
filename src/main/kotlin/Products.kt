@@ -4,10 +4,11 @@ object Products {
 
     data class Product(val id: Int, val name: String, var quantity: Int, val price: Int)
 
-    var products = vendingProducts()
+    var products :Array<Product> = emptyArray()
 
     fun init() {
         FileAccess.init()
+        products = vendingProducts()
 
     }
 
@@ -21,10 +22,16 @@ object Products {
     }
 
     fun saveProducts(array: Array<Product>) {
-        FileAccess.writeProductFile(array)
+        val newArray = Array(array.size){""}
+        for (i in array.indices) {
+            val line = "${array[i].id};${array[i].name};${array[i].quantity};${array[i].price}"
+            newArray[i] = line
+        }
+
+        FileAccess.writeProductFile(newArray)
     }
 
-    fun Product.addQuantity(quantity: Int): Products.Product {
+    fun Product.addQuantity(quantity: Int): Product {
         return this.copy(quantity = this.quantity + quantity)
     }
 

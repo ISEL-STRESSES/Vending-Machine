@@ -7,7 +7,7 @@ import java.io.PrintWriter
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
  */
 object FileAccess {
-    //Variable Inicialization.
+    //Variable Initialization.
     private const val COIN_LOG = "CoinDeposit.txt"      //Name of the Coin log file.
     private const val PRODUCTS_LOG = "Products.txt"     //Name of the file that has every product of the Vending Machine.
 
@@ -21,8 +21,8 @@ object FileAccess {
 
 
     /**
-     * Function that TODO
-     * @return Array ...
+     * Function that reads the [PRODUCTS_LOG] file.
+     * @return Array of strings that represent each line on the file.
      */
     fun readProductFile(): Array<String> {
         return readFile(PRODUCTS_LOG)
@@ -30,52 +30,46 @@ object FileAccess {
 
 
     /**
-     * Function that TODO
-     * @return Array ...
+     * Function that reads the [COIN_LOG] file.
+     * @return Array of strings that represent each line on the file.
      */
     fun readCoinFile(): Array<String> {
         return readFile(COIN_LOG)
-
     }
 
 
     /**
-     * Function that TODO
-     * @param array
+     * Function that writes the Product log.
+     * @param array Array of Strings that have the last information on the Products.
      */
-    fun writeProductFile(array: Array<Products.Product>) {
-        val writer = createWriter(PRODUCTS_LOG)
+    fun writeProductFile(array: Array<String>) {
+        writeFile(array, PRODUCTS_LOG)
+    }
+
+
+    /**
+     * Function that writes in an output file.
+     * @param array Array to write in output file.
+     * @param fileName Name of the file to write.
+     */
+    private fun writeFile(array: Array<String>, fileName: String){
+        val writer = createWriter(fileName)
         array.forEach {
-            val line = "${it.id};${it.name};${it.quantity};${it.price}"
-            writer.println(line)
-            println(line)
+            writer.println(it)
+            println(it)
         }
         writer.close()
     }
 
 
     /**
-     * Function that writes the Coin log. TODO
-     * @param array
-     * @param date
-     * @param time
-     * @param coin
+     * Function that writes the Coin log.
+     * @param array Array of Strings that have the last information on the Coins.
      */
-    fun writeCoinLog(array: Array<CoinDeposit.Coin>, date: String, time: String, coin: Int) {
-        val writer = createWriter(COIN_LOG)
-        if (array.size > 1)
-            array.forEach {
-                val coins = "${it.count};${it.date};${it.time}"
-                writer.println(coins)
-                println(coins)
-            }
-
-        val currentVendingCoins = "${coin};$date;$time"
-        writer.println(currentVendingCoins)
-        println(currentVendingCoins)
-
-        writer.close()
+    fun writeCoinLog(array: Array<String>) {
+        writeFile(array, COIN_LOG)
     }
+
 
     /**
      * Function that reads all the lines of a given file.

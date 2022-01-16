@@ -22,6 +22,19 @@ object CoinDeposit {
         return coins
     }
 
+    fun saveCoins(array: Array<Coin>) {
+        val newArray = Array(array.size+1){""}
+        if (array.size > 1)
+            for (i in array.indices){
+                val coin = "${array[i].count};${array[i].date}${array[i].time}"
+                newArray[i] = coin
+            }
+
+        val currentLog = "${COINS};${Time.getDate()};${Time.getTime()}"
+        newArray[newArray.lastIndex] = currentLog
+        FileAccess.writeCoinLog(newArray)
+    }
+
     private fun depositFull() :Boolean {
         return COINS >= COINS_DEPOSIT_MAX_CAPACITY
     }

@@ -34,7 +34,7 @@ object Vending {
      */
     fun printInitialMenu(update: Boolean = false) {
         val currentTime = Time.getCurrentTime()
-        if ((Time.getCurrentTime() - Time.LAST_TIME >= 60000L) || update) {
+        if ((currentTime/*Time.getCurrentTime()*/ - Time.LAST_TIME >= 60000L) || update) {
 
             Time.LAST_TIME = currentTime
             TUI.printText("Vending Machine ", line = 0)
@@ -64,13 +64,14 @@ object Vending {
         if (TUI.getKBDKey(TIME_OUT) == '#')
             pickedProduct = pickProduct(mode, Products.products)
 
-        if ((TUI.getKBDKey(TIME_OUT) == '#') && (pickedProduct != null)) {
-            selectedProduct = selectProduct(pickedProduct)
+        if (pickedProduct != null) {
+            return sellProduct(pickedProduct)
+
         }
 
-        if (selectedProduct!= null){
-            return sellProduct(selectedProduct)
-        }
+//        if (selectedProduct!= null){
+//            return sellProduct(selectedProduct)
+//        }
         return null
     }
 
@@ -81,15 +82,14 @@ object Vending {
     private fun pickProduct(mode: Mode, products : Array<Products.Product>): Products.Product? {
 
         var currentMode = mode
+        var key :Char
 
-        val firstProduct = products.first { it.quantity > 0 }
-        TUI.printProduct(firstProduct)
-        var index = firstProduct.id
+        var product = products.first { it.quantity > 0 }
+        TUI.printProduct(product)
+        var index = product.id
 
-        val key = TUI.getKBDKey(TIME_OUT)
+        while (TUI.getKBDKey(TIME_OUT).also { key = it } != KBD.NONE) {
 
-        while (key != KBD.NONE) {
-            var product = firstProduct
             println(key)
             when (key){
                 '*' -> currentMode = currentMode.switchMode()
@@ -141,35 +141,38 @@ object Vending {
     /**
      *
      */
-    private fun selectProduct(product: Products.Product): Products.Product? {
-        throw UnsupportedOperationException()
-    }
+//    private fun selectProduct(product: Products.Product): Products.Product? {
+//        throw UnsupportedOperationException()
+//    }
 
 
     /**
      *
      */
     private fun sellProduct(selectedProduct: Products.Product):String? {
+        TUI.printSell(selectedProduct, selectedProduct.price)
         var coinsInserted = 0
         while (coinsInserted < selectedProduct.price) {
             if (TUI.getKBDKey(TIME_OUT) == '#') {
-                TUI.printText("Vending Aborted",TUI.Position.CENTER,0)
-                TUI.printText("Return $coinsInserted",TUI.Position.CENTER,1)
+                TUI.printCancel(coinsInserted)
                 CoinAcceptor.ejectCoins()
+                break
             }
 
             if (CoinAcceptor.hasCoin()){
                 CoinAcceptor.acceptCoin()
                 coinsInserted++
+                TUI.printSell(selectedProduct, selectedProduct.price-coinsInserted)
             }
             if (coinsInserted == selectedProduct.price){
+                TUI.printText("Collect Product", TUI.Position.CENTER, 1)
                 Dispenser.dispense(selectedProduct.id)
                 Products.products[selectedProduct.id].quantity--
                 CoinDeposit.COINS +=coinsInserted
                 break
             }
         }
-        TUI.printText("Collect Product", TUI.Position.CENTER, 0)
+
         val depositRequest = CoinDeposit.emptyDepositRequest()
         if (depositRequest != null){
             TUI.printText("OUT OF SERVICE", TUI.Position.CENTER, 0)

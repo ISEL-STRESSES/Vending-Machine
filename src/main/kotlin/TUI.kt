@@ -44,6 +44,19 @@ object TUI {
     }
 
 
+    fun printSell(product: Products.Product, price: Int){
+        clearLCD()
+        printText(product.name, Position.CENTER, 0)
+        printText(price.toString(), Position.CENTER, 1)
+    }
+
+    fun printCancel(coins:Int){
+        clearLCD()
+        printText("Vending Aborted",Position.CENTER,0)
+        if (coins > 0)
+            printText("Return $coins",Position.CENTER,1)
+    }
+
     /**
      *
      */
@@ -52,7 +65,7 @@ object TUI {
         val middle = LCD.COLUMNS/2 - textSize/2
         when (position) {
             Position.CENTER -> {
-                LCD.cursor(line,if (textSize % 2 == 0) middle else middle /*-1*/)
+                LCD.cursor(line,if (textSize % 2 == 0) middle else middle -1)
                 LCD.write(text,false)
             }
             Position.RIGHT -> { //TODO("MAIS BONITA")
@@ -71,7 +84,7 @@ object TUI {
      */
     private fun clearLine(line:Int) {
         repeat(LINE_SIZE) {
-            LCD.cursor(line,it-1)
+            LCD.cursor(line,it)
             LCD.write(" ", false)
         }
     }
