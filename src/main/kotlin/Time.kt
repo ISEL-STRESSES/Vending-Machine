@@ -1,4 +1,3 @@
-
 import Time.LAST_TIME
 import Time.getCurrentTime
 import Time.getDate
@@ -7,6 +6,10 @@ import Time.secsToTime
 import isel.leic.utils.Time
 import java.text.SimpleDateFormat
 
+/**
+ * TODO
+ * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
+ */
 object Time {
     //Variable Initialization.
     private const val TIME_FORMAT = "dd-MM-yyyy HH:mm"      //Time format.
@@ -51,10 +54,9 @@ object Time {
 
     fun getTime(): String {
         val time = getCurrentTime().secsToTime()
-        return  time.drop(DATE_SIZE)
+        return time.drop(DATE_SIZE)
     }
 }
-
 
 
 /**
@@ -67,7 +69,7 @@ fun main() {
         val currentTime = getCurrentTime()
         if (currentTime - LAST_TIME >= 60000L)
             LAST_TIME = currentTime
-            println(LAST_TIME.secsToTime())
+        println(LAST_TIME.secsToTime())
     }
 
 }

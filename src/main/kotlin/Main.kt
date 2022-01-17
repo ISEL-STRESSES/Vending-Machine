@@ -1,6 +1,6 @@
-enum class Mode {ARROWS, INDEX}
+enum class Mode { ARROWS, INDEX }
 
-enum class Operation {MAINTENANCE, VENDING, REQUESTS}
+enum class Operation { MAINTENANCE, VENDING, REQUESTS }
 
 /**
  * Runs the Vending machine and its modes.
@@ -16,10 +16,9 @@ fun main() {
         if (M.setMaintenance()) {
             mode = Operation.MAINTENANCE
             Maintenance.runMaintenance(mode2)
-        }
-        else {
+        } else {
             val request = Vending.run(mode2)
-            if (request != null){
+            if (request != null) {
                 mode = Operation.REQUESTS
 
                 //TODO("NOT YET IMPLEMENTED")

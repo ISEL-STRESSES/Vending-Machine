@@ -39,7 +39,7 @@ object LCD {
     private fun writeNibbleSerial(rs: Boolean, data: Int) {
         val realData = (data shl 1)
         //adding RS bit to data.
-        if (rs) SerialEmitter.send(SerialEmitter.Destination.LCD,realData or 1 )
+        if (rs) SerialEmitter.send(SerialEmitter.Destination.LCD, realData or 1)
         else SerialEmitter.send(SerialEmitter.Destination.LCD, realData or 0)
 
     }
@@ -50,11 +50,11 @@ object LCD {
      * Instruction Register (IR) or Data Register (DR).
      * @param data Data to be sent to LCD (the lowest level function in the class).
      */
-    private fun writeNibbleParallel(rs: Boolean, data: Int){
-        if(rs) HAL.setBits(REGISTER_SELECT_BIT)
+    private fun writeNibbleParallel(rs: Boolean, data: Int) {
+        if (rs) HAL.setBits(REGISTER_SELECT_BIT)
         else HAL.clrBits(REGISTER_SELECT_BIT)
         HAL.setBits(ENABLE_SIGNAL_BIT)
-        HAL.writeBits(WRITE_MASK,data)
+        HAL.writeBits(WRITE_MASK, data)
         HAL.clrBits(ENABLE_SIGNAL_BIT)
     }
 
@@ -64,9 +64,9 @@ object LCD {
      * Instruction Register (IR) or Data Register (DR).
      * @param data Data to be sent to LCD (the lowest level function in the class).
      */
-    private fun writeNibble(rs: Boolean, data: Int){
-        if (SERIAL_MODE) writeNibbleSerial(rs,data)
-        else writeNibbleParallel(rs,data)
+    private fun writeNibble(rs: Boolean, data: Int) {
+        if (SERIAL_MODE) writeNibbleSerial(rs, data)
+        else writeNibbleParallel(rs, data)
     }
 
     /**
@@ -105,21 +105,21 @@ object LCD {
         HAL.init()
         SerialEmitter.init()
 
-        // 8 bit data interface ------------
-            //first message.
+        //8 bit data interface ------------
+        //First message.
         Time.sleep(FIRST_WAIT_TIME)
         writeNibble(!REGISTER_SELECT, DATA_INIT)
-            //second message.
+        //Second message.
         Time.sleep(SECOND_WAIT_TIME)
         writeNibble(!REGISTER_SELECT, DATA_INIT)
-            //third message.
+        //Third message.
         writeNibble(!REGISTER_SELECT, DATA_INIT)
-            //From this moment BF (busy flag) can be read.
+        //From this moment BF (busy flag) can be read.
 
         writeNibble(!REGISTER_SELECT, SET_FOUR_BIT_INTERFACE)
-            //From this moment the Interface is set to four bits.
+        //From this moment the Interface is set to four bits.
 
-        // 4 bit data interface ------------
+        //4 bit data interface ------------
         writeCMD(LINES_AND_FONT)
         writeCMD(DISPLAY_OFF)
         writeCMD(DISPLAY_CLEAR)
@@ -135,7 +135,7 @@ object LCD {
      * Function that writes a character in current position.
      * @param c Char to be written.
      */
-    fun write(c: Char) {
+    private fun write(c: Char) {
         writeDATA(c.code)
     }
 
@@ -144,7 +144,7 @@ object LCD {
      * @param text String to be written.
      */
     fun write(text: String, aesthetics: Boolean = false) {
-        for (i in text){
+        for (i in text) {
             //writes letter by letter with time gap for aesthetics.
             if (aesthetics) Time.sleep(125)
             write(i)
@@ -178,10 +178,17 @@ object LCD {
     }
 
     //Extra----------------
+
+    /**
+     * Function that...TODO
+     */
     fun setDDRAMAddress(address: Int) {
         writeCMD((1 shl 7) or address)
     }
 
+    /**
+     * Function that...TODO
+     */
     fun setCGRAMaddress(address: Int) {
         writeCMD(SET_CGRAM_ADDRESS or address)
     }
@@ -191,7 +198,7 @@ object LCD {
 /**
  * Main function for testing the class.
  */
-fun main () {
+fun main() {
 
     HAL.init()
     SerialEmitter.init()

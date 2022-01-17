@@ -1,4 +1,3 @@
-
 /**
  * Interface that controls the state of the dispenser mechanism.
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
@@ -19,7 +18,7 @@ object Dispenser {
      * @param productId Product id to dispense.
      */
     fun dispense(productId: Int) {
-        SerialEmitter.send(SerialEmitter.Destination.DISPENSER,productId)
+        SerialEmitter.send(SerialEmitter.Destination.DISPENSER, productId)
     }
 
 }

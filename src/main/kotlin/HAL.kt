@@ -1,4 +1,3 @@
-
 //import needed for connecting with an external device through a USB Port
 import isel.leic.UsbPort
 
@@ -6,7 +5,7 @@ import isel.leic.UsbPort
  * Interface used to communicate with the hardware easily.
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
  */
-object  HAL {
+object HAL {
 
     //Variable initialization
     //value that will be manipulated for the output value.
@@ -16,7 +15,7 @@ object  HAL {
     /**
      * Initializes the class by writing the default [outputValue] into the hardware for it's reset.
      */
-    fun init(){
+    fun init() {
         if (HAL_STATE) return
         val fullMask = 0xFF
         writeBits(fullMask, outputValue)
@@ -28,7 +27,7 @@ object  HAL {
      * @param mask Mask to check if a bit is One or Zero.
      * @return The representation of that bit in form of a boolean (true or false).
      */
-    fun isBit(mask: Int) :Boolean {
+    fun isBit(mask: Int): Boolean {
         require(mask.countOneBits() == 1) { "Mask can only have one set bit" }
         val readBit = readBits(mask)
         return readBit != 0
@@ -40,8 +39,8 @@ object  HAL {
      * @param mask Mask corresponding to the bits that we can read.
      * @return The bits in the input USB Port passed by [mask].
      */
-    fun readBits(mask: Int) :Int{
-        val input = USBPortIn()
+    fun readBits(mask: Int): Int {
+        val input = usbPortIn()
         return input and mask
     }
 
@@ -50,10 +49,10 @@ object  HAL {
      * @param mask Mask corresponding to the bits that we can write.
      * @param value Value to write in the output USB Port.
      */
-    fun writeBits(mask: Int, value:Int) {
+    fun writeBits(mask: Int, value: Int) {
         outputValue = outputValue and mask.inv()
         outputValue = outputValue or (mask and value)
-        USBPortOut(outputValue)
+        usbPortOut(outputValue)
 
     }
 
@@ -63,25 +62,31 @@ object  HAL {
      */
     fun setBits(mask: Int) {
         outputValue = outputValue or mask
-        USBPortOut(outputValue)
+        usbPortOut(outputValue)
     }
 
     /**
      * Function that sets the bits corresponding to the One's in [mask] to the logic value Zero.
      * @param mask Mask to write Zero's.
      */
-    fun clrBits(mask: Int){
+    fun clrBits(mask: Int) {
         outputValue = (outputValue and mask.inv())
-        USBPortOut(outputValue)
+        usbPortOut(outputValue)
     }
 
 
-    //Extras-------------------
-    private fun USBPortOut(value: Int){
+    /**
+     * Function that...TODO
+     */
+    private fun usbPortOut(value: Int) {
         UsbPort.out(value.inv())
     }
 
-    private fun USBPortIn() : Int{
+
+    /**
+     * Function that...TODO
+     */
+    private fun usbPortIn(): Int {
         return UsbPort.`in`().inv()
     }
 
@@ -104,7 +109,7 @@ fun main() {
     //Will trow an expected exception
 //    println("Should print \"Mask can only have one set bit\" and prints -> ${HAL.isBit(0x03)}") //DONE
 
-    println("Expected -> 18, real ->${HAL.writeBits(0x3c,0x18)}")                          //DONE
+    println("Expected -> 18, real ->${HAL.writeBits(0x3c, 0x18)}")                          //DONE
 
     println("Expected -> FF, real ->${HAL.clrBits(0x3c)}")                                      //DONE
 

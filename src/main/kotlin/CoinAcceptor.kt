@@ -6,12 +6,12 @@ import isel.leic.utils.Time
  */
 object CoinAcceptor {
     //Variable initialization.
-    private const val COIN_READ_MASK = 0x20         // Mask to read if a coin was introduced.
-    private const val COIN_ACCEPT_MASK = 0x10       // Mask to write the Accept Signal to the Coin Acceptor hardware component.
-    private const val COIN_COLLECT_MASK = 0x20      // Mask to write the Collect Signal to the Coin Acceptor hardware component.
-    private const val COIN_EJECT_MASK = 0x40        // Mask to write the Eject Signal to the Coin Acceptor hardware component.
-    private const val WAIT_TIME = 1000L             // Time to maintain Eject and Collect signal commands.
-    private var COIN_ACCEPTOR_STATE = false         // Current State of Coin Acceptor class (if it was already initialized).
+    private const val COIN_READ_MASK = 0x20     //Mask to read if a coin was introduced.
+    private const val COIN_ACCEPT_MASK = 0x10   //Mask to write the Accept Signal to the Coin Acceptor hardware component.
+    private const val COIN_COLLECT_MASK = 0x20  //Mask to write the Collect Signal to the Coin Acceptor hardware component.
+    private const val COIN_EJECT_MASK = 0x40    //Mask to write the Eject Signal to the Coin Acceptor hardware component.
+    private const val WAIT_TIME = 1000L         //Time to maintain Eject and Collect signal commands.
+    private var COIN_ACCEPTOR_STATE = false     //Current State of Coin Acceptor class (if it was already initialized).
 
     /**
      * Function that initializes the class of the Coin Acceptor.
@@ -76,7 +76,7 @@ fun main() {
     HAL.init()
     CoinAcceptor.init()
     CoinAcceptor.ejectCoins()
-    var coins = 0
+//    var coins = 0
 //    while (!CoinAcceptor.depositFull()) {
 //        if (CoinAcceptor.hasCoin()) {
 //            CoinAcceptor.acceptCoin()

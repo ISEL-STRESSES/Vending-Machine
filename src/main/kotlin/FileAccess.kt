@@ -8,15 +8,18 @@ import java.io.PrintWriter
  */
 object FileAccess {
     //Variable Initialization.
-    private const val COIN_LOG = "CoinDeposit.txt"      //Name of the Coin log file.
-    private const val PRODUCTS_LOG = "Products.txt"     //Name of the file that has every product of the Vending Machine.
+    private const val COIN_LOG = "CoinDeposit.txt"  //Name of the Coin log file.
+    private const val PRODUCTS_LOG = "Products.txt" //Name of the file that has every product of the Vending Machine.
+    private var FILE_ACCESS_STATE = false           //Current State of File Access (if it was already initialized).
 
     /**
      * Function that initializes the class of the File Access.
      * If it was already initialized exists the function.
      */
     fun init() {
-
+        if (FILE_ACCESS_STATE) return
+        //...
+        FILE_ACCESS_STATE = true
     }
 
 
@@ -48,11 +51,20 @@ object FileAccess {
 
 
     /**
+     * Function that writes the Coin log.
+     * @param array Array of Strings that have the last information on the Coins.
+     */
+    fun writeCoinFile(array: Array<String>) {
+        writeFile(array, COIN_LOG)
+    }
+
+
+    /**
      * Function that writes in an output file.
      * @param array Array to write in output file.
      * @param fileName Name of the file to write.
      */
-    private fun writeFile(array: Array<String>, fileName: String){
+    private fun writeFile(array: Array<String>, fileName: String) {
         val writer = createWriter(fileName)
         array.forEach {
             writer.println(it)
@@ -63,20 +75,11 @@ object FileAccess {
 
 
     /**
-     * Function that writes the Coin log.
-     * @param array Array of Strings that have the last information on the Coins.
-     */
-    fun writeCoinLog(array: Array<String>) {
-        writeFile(array, COIN_LOG)
-    }
-
-
-    /**
      * Function that reads all the lines of a given file.
      * @param fileName Name of the file to read.
      * @return Returns an Array of Strings that represent each line.
      */
-    private fun readFile(fileName: String) : Array<String>{
+    private fun readFile(fileName: String): Array<String> {
         val reader = createReader(fileName)
         var line: String?
         var lines = emptyArray<String>()

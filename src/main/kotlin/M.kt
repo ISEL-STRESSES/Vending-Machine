@@ -23,7 +23,7 @@ object M {
      * Function that checks if the M signal is active.
      * @return Returns True if the signal is active or false is inactive.
      */
-    fun setMaintenance(): Boolean{
+    fun setMaintenance(): Boolean {
         return HAL.isBit(M_MASK)
     }
 
@@ -33,10 +33,10 @@ object M {
 /**
  * Main function for testing.
  */
-fun main(){
+fun main() {
     HAL.init()
     val mask = 0x80
     val signal = HAL.readBits(mask)
-    HAL.writeBits(mask,signal)
+    HAL.writeBits(mask, signal)
     println("$signal")
 }

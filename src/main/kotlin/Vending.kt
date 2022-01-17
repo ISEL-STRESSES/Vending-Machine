@@ -23,14 +23,16 @@ object Vending {
         M.init()
         CoinAcceptor.init()
         Dispenser.init()
+        FileAccess.init()
+        Time.init()
         Products.init()
         CoinDeposit.init()
-        FileAccess.init()
+
     }
 
 
     /**
-     *
+     * Function that...TODO
      */
     fun printInitialMenu(update: Boolean = false) {
         val currentTime = Time.getCurrentTime()
@@ -45,7 +47,7 @@ object Vending {
 
 
     /**
-     *
+     * Function that...TODO
      */
     private fun printTime(currentTime: Long) {
         TUI.printText(currentTime.secsToTime(), line = 1)
@@ -53,13 +55,12 @@ object Vending {
 
 
     /**
-     *
+     * Function that...TODO
      */
     fun run(mode: Mode): String? {
         printInitialMenu(force)
 
-        var pickedProduct:Products.Product? = null
-        var selectedProduct: Products.Product? = null
+        var pickedProduct: Products.Product? = null
 
         if (TUI.getKBDKey(TIME_OUT) == '#')
             pickedProduct = pickProduct(mode, Products.products)
@@ -69,20 +70,17 @@ object Vending {
 
         }
 
-//        if (selectedProduct!= null){
-//            return sellProduct(selectedProduct)
-//        }
         return null
     }
 
 
     /**
-     *
+     * Function that...TODO
      */
-    private fun pickProduct(mode: Mode, products : Array<Products.Product>): Products.Product? {
+    private fun pickProduct(mode: Mode, products: Array<Products.Product>): Products.Product? {
 
         var currentMode = mode
-        var key :Char
+        var key: Char
 
         var product = products.first { it.quantity > 0 }
         TUI.printProduct(product)
@@ -91,16 +89,15 @@ object Vending {
         while (TUI.getKBDKey(TIME_OUT).also { key = it } != KBD.NONE) {
 
             println(key)
-            when (key){
+            when (key) {
                 '*' -> currentMode = currentMode.switchMode()
                 '#' -> if (product.quantity > 0) return product
                 in KEY_INTERVAL -> {
                     if (currentMode == Mode.INDEX) {
                         product = products[key.toInteger()]
                         index = product.id
-                    }
-                    else {
-                        product = browseProducts(products,index,key)
+                    } else {
+                        product = browseProducts(products, index, key)
                         index = product.id
                     }
 
@@ -114,13 +111,15 @@ object Vending {
 
 
     /**
-     *
+     * Function that toggles trough modes
+     * @receiver [Mode] current mode.
+     * @return new mode.
      */
     private fun Mode.switchMode(): Mode = if (this == Mode.INDEX) Mode.ARROWS else Mode.INDEX
 
 
     /**
-     *
+     * Function that...TODO
      */
     private fun browseProducts(products: Array<Products.Product>, currentIndex: Int = 0, key: Char): Products.Product {
         var index = currentIndex
@@ -133,23 +132,15 @@ object Vending {
 
 
     /**
-     *
+     * Function that...TODO
      */
     private fun Char.toInteger(): Int = this - '0'
 
 
     /**
-     *
+     * Function that...TODO
      */
-//    private fun selectProduct(product: Products.Product): Products.Product? {
-//        throw UnsupportedOperationException()
-//    }
-
-
-    /**
-     *
-     */
-    private fun sellProduct(selectedProduct: Products.Product):String? {
+    private fun sellProduct(selectedProduct: Products.Product): String? {
         TUI.printSell(selectedProduct, selectedProduct.price)
         var coinsInserted = 0
         while (coinsInserted < selectedProduct.price) {
@@ -159,24 +150,25 @@ object Vending {
                 break
             }
 
-            if (CoinAcceptor.hasCoin()){
+            if (CoinAcceptor.hasCoin()) {
                 CoinAcceptor.acceptCoin()
                 coinsInserted++
-                TUI.printSell(selectedProduct, selectedProduct.price-coinsInserted)
+                TUI.printSell(selectedProduct, selectedProduct.price - coinsInserted)
             }
-            if (coinsInserted == selectedProduct.price){
+            if (coinsInserted == selectedProduct.price) {
                 TUI.printText("Collect Product", TUI.Position.CENTER, 1)
+                CoinAcceptor.collectCoins()
                 Dispenser.dispense(selectedProduct.id)
                 Products.products[selectedProduct.id].quantity--
-                CoinDeposit.COINS +=coinsInserted
+                CoinDeposit.COINS += coinsInserted
                 break
             }
         }
 
         val depositRequest = CoinDeposit.emptyDepositRequest()
-        if (depositRequest != null){
+        if (depositRequest != null) {
             TUI.printText("OUT OF SERVICE", TUI.Position.CENTER, 0)
-            TUI.printText(depositRequest,TUI.Position.CENTER,1)
+            TUI.printText(depositRequest, TUI.Position.CENTER, 1)
             return depositRequest
         }
         return null
@@ -186,7 +178,7 @@ object Vending {
 
 
 /**
- *
+ * Main function for testing the class.
  */
 fun main() {
     Vending.blocksInit()

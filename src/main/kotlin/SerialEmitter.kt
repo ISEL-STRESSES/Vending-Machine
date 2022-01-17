@@ -1,4 +1,3 @@
-
 /**
  * Interface that implements communication over a Serial Protocol.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado
@@ -8,11 +7,11 @@ object SerialEmitter {
     /**
      * Enumerate that sets the destination for data in hardware.
      */
-    enum class Destination {DISPENSER, LCD}
+    enum class Destination { DISPENSER, LCD }
 
     private const val SCLK = 0x02                   //Mask to write the SCLK value in the USBPort.
     private const val SDX = 0x01                    //Mask to write the SDX value in the USBPort.
-    private const val BUSY = 0x80                   //Mask to read the Busy flag given by the Serial Control (hardware).
+    private const val BUSY = 0x40                   //Mask to read the Busy flag given by the Serial Control (hardware).
     private const val ONE_MASK = 0x01               //Mask to check parity.
     private var SERIAL_EMITTER_STATE = false        //Current State of Serial Emitter(if it was already initialized).
 
@@ -22,7 +21,6 @@ object SerialEmitter {
     fun init() {
         //if Serial Emitter was already initialized skips it.
         if (SERIAL_EMITTER_STATE) return
-
         HAL.init()
         HAL.setBits(SDX)
         HAL.clrBits(SCLK)
@@ -53,14 +51,14 @@ object SerialEmitter {
         HAL.clrBits(SDX)
 
         //sending destination.
-        HAL.writeBits(SDX,destination)
+        HAL.writeBits(SDX, destination)
         if (destination and ONE_MASK == 1)
             count1s++
 
         //sending data and checks for parity.
-        while (maxSize > 0){
+        while (maxSize > 0) {
             HAL.setBits(SCLK)
-            HAL.writeBits(SDX,dataToSend)
+            HAL.writeBits(SDX, dataToSend)
 
             if (dataToSend and ONE_MASK == 1)
                 count1s++
@@ -97,7 +95,7 @@ fun main() {
     LCD.init()
     SerialEmitter.init()
 
-    SerialEmitter.send(SerialEmitter.Destination.LCD,2)
+    SerialEmitter.send(SerialEmitter.Destination.LCD, 2)
 
     SerialEmitter.send(SerialEmitter.Destination.DISPENSER, 5)
 }

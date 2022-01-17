@@ -1,7 +1,13 @@
 import isel.leic.utils.Time
+import kotlin.system.exitProcess
 
+
+/**
+ * TODO
+ * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
+ */
 object Maintenance {
-    val option = arrayOf("1-Dispense Test ","2-Update Prod.","3-Remove Prod.","4-Shutdown")
+    private val OPTIONS = arrayOf("1-Dispense Test ", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
     private const val WAIT_TIME = 500L
     fun init() {
         Vending.blocksInit()
@@ -9,46 +15,84 @@ object Maintenance {
 
     /**
      * Function that saves the products and its properties as well as the number of coins introduced during functioning.
-     *
+     * TODO
      */
-    fun printSystemOut(array: Array<Products.Product>, coins: Array<CoinDeposit.Coin>){
-        CoinDeposit.saveCoins(coins)
-        Products.saveProducts(array)
+    private fun printSystemOut(array: Array<Products.Product>, coins: Array<CoinDeposit.Coin>) {
+        TUI.printShutdown()
+        val key = TUI.getKBDKey(WAIT_TIME)
+        if (key == '5') {
+            CoinDeposit.saveCoins(coins)
+            Products.saveProducts(array)
+            exitProcess(0)
+        } else return
     }
 
-    fun maintenanceOptions() {
-        TUI.printText("Maintenance Mode", line = 0)
-        while (M.setMaintenance()) {
-            togleThowoptions()
-            val key = TUI.getInt(0L)
-            setOptions()
-        }
-    }
-    fun togleThowoptions(){
+
+    /**
+     * Function that...TODO
+     */
+    private fun toggleThroughOptions() {
         var index = 0
-        TUI.printText(option[index++], line = 1)
+        TUI.printText(OPTIONS[index++], line = 1)
         Time.sleep(WAIT_TIME)
     }
 
-    fun setOptions(){
 
-    }
-
-
-    fun printMaintenance() {
+    /**
+     * Function that...TODO
+     */
+    private fun printMaintenance() {
         TUI.clearLCD()
         TUI.printText("Maintenance Mode", TUI.Position.RIGHT, 0)
-        togleThowoptions()
+        toggleThroughOptions()
 
     }
 
-    fun runMaintenance(mode : Mode) {
+
+    /**
+     * Function that...TODO
+     */
+    fun runMaintenance(mode: Mode) {
         printMaintenance()
+        when (TUI.getKBDKey(WAIT_TIME)) {
+            '1' -> {
+                dispenseTest(mode)
+            }
+            '2' -> {
+                updateProduct()
+            }
+            '3' -> {
+                removeProduct()
+            }
+            '4' -> {
+                printSystemOut(Products.products, CoinDeposit.COINS_LOG)
+            }
+        }
     }
 
 
-}
+    /**
+     * Function that...TODO
+     */
+    private fun updateProduct() {
+        TODO("Not yet implemented")
+    }
 
-fun main(){
-    Maintenance.maintenanceOptions()
+
+    /**
+     * Function that...TODO
+     */
+    private fun removeProduct() {
+        TODO("Not yet implemented")
+    }
+
+
+    /**
+     * Function that...TODO
+     */
+    private fun dispenseTest(mode: Mode) {
+        TODO("Not yet implemented")
+    }
+
+
 }
