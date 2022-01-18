@@ -3,7 +3,7 @@
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
  */
 object Dispenser {
-    private var DISPENSER_SATE = false      //Current State of Dispenser(if it was already initialized).
+    private var DISPENSER_SATE =false      //Current State of Dispenser(if it was already initialized).
 
     /**
      * Initializes the class (in this particular case is not needed).

@@ -9,7 +9,7 @@ object SerialEmitter {
      */
     enum class Destination { DISPENSER, LCD }
 
-    private const val SCLK = 0x02                   //Mask to write the SCLK value in the USBPort.
+    private const val SCLK =0x02                   //Mask to write the SCLK value in the USBPort.
     private const val SDX = 0x01                    //Mask to write the SDX value in the USBPort.
     private const val BUSY = 0x40                   //Mask to read the Busy flag given by the Serial Control (hardware).
     private const val ONE_MASK = 0x01               //Mask to check parity.

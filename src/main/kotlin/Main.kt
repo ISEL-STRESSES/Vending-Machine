@@ -7,7 +7,7 @@ enum class Operation { MAINTENANCE, VENDING, REQUESTS }
  */
 fun main() {
     //initializes all the app lower blocks
-    Vending.blocksInit()
+    App.allBlocksInit()
     Vending.printInitialMenu()
     var mode = Operation.VENDING
     val mode2 = Mode.INDEX

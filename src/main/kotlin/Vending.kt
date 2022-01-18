@@ -1,45 +1,40 @@
+import TUI.toInteger
 import Time.secsToTime
 
+/**
+ * Class that implements the Vending Routine.
+ * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
+ */
 object Vending {
-    enum class Operation { MAINTENANCE, VENDING }
-
-    var mode: Operation? = null
-    private const val TIME_OUT = 5000L
-    private const val KEY_UP = 2
-    private const val KEY_DOWN = 8
-    private var force = true
-    private val KEY_INTERVAL = ('0'..'9')
+    //Variable initialization.
+    private const val TIME_OUT = 5000L          //Time to wait for a key.
+    private const val KEY_UP = 2                //Key to use as up arrow.
+    private const val KEY_DOWN = 8              //Key to use as down arrow.
+    private var force = true                    //Flag that indicates if is needed to print again the initial menu.
+    private val KEY_INTERVAL = ('0'..'9') //Interval of integer keys.
+    private var VENDING_STATE = false           //Current State of Vending(if it was already initialized).
 
 
     /**
-     * Initializes all the Lower Blocks.
+     * Function that initializes the class of the Vending.
+     * If it was already initialized exists the function.
      */
-    fun blocksInit() {
-        HAL.init()
-        SerialEmitter.init()
-        LCD.init()
-        KBD.init()
-        TUI.init()
-        M.init()
-        CoinAcceptor.init()
-        Dispenser.init()
-        FileAccess.init()
-        Time.init()
-        Products.init()
-        CoinDeposit.init()
-
+    fun init() {
+        if (VENDING_STATE) return
+        App.allBlocksInit()
+        VENDING_STATE = true
     }
 
-
     /**
-     * Function that...TODO
+     * Function that print the initial menu of the Vending Machine.
+     * @param update Flag that forces the print of the menu.
      */
     fun printInitialMenu(update: Boolean = false) {
         val currentTime = Time.getCurrentTime()
         if ((currentTime/*Time.getCurrentTime()*/ - Time.LAST_TIME >= 60000L) || update) {
 
             Time.LAST_TIME = currentTime
-            TUI.printText("Vending Machine ", line = 0)
+            TUI.printText("Vending Machine ",TUI.Position.LEFT, 0)
             printTime(Time.LAST_TIME)
         }
 
@@ -47,15 +42,18 @@ object Vending {
 
 
     /**
-     * Function that...TODO
+     * Function that prints the Time and Date on the LCD.
+     * @param currentTime Time since 1st january 1970 in milliseconds.
      */
     private fun printTime(currentTime: Long) {
-        TUI.printText(currentTime.secsToTime(), line = 1)
+        TUI.printText(currentTime.secsToTime(), TUI.Position.LEFT,1)
     }
 
 
     /**
-     * Function that...TODO
+     * Function that has the routine of the Vending Mode.
+     * @param mode Mode needed for the [pickProduct].
+     * @return Returns requests if there is any
      */
     fun run(mode: Mode): String? {
         printInitialMenu(force)
@@ -75,7 +73,10 @@ object Vending {
 
 
     /**
-     * Function that...TODO
+     * Function that has the pick product protocol of the Vending Machine.
+     * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
+     * @param products Array that has all the product of the Vending Machine.
+     * @return Returns a picked Product or null if the sequence wasn't right.
      */
     private fun pickProduct(mode: Mode, products: Array<Products.Product>): Products.Product? {
 
@@ -86,7 +87,7 @@ object Vending {
         TUI.printProduct(product)
         var index = product.id
 
-        while (TUI.getKBDKey(TIME_OUT).also { key = it } != KBD.NONE) {
+        while (TUI.getKBDKey(TIME_OUT).also { key = it } != TUI.NONE) {
 
             println(key)
             when (key) {
@@ -119,26 +120,42 @@ object Vending {
 
 
     /**
-     * Function that...TODO
+     * Function that browses troth all the products of the vending Machine.
+     * @param products Array of all Products.
+     * @param currentIndex Current index of the product.
+     * @param key Key to check if is available for [Mode.ARROWS].
+     * @return Returns a product after one key pressed.
      */
     private fun browseProducts(products: Array<Products.Product>, currentIndex: Int = 0, key: Char): Products.Product {
         var index = currentIndex
         return when (key.toInteger()) {
-            KEY_DOWN -> if (index - 1 in products.indices) products[--index] else products[index]//TODO("CAN MAKE TEH LIST GO AROUND")
-            KEY_UP -> if (index + 1 in products.indices) products[++index] else products[index]
+            KEY_DOWN -> {
+                if (index - 1 in products.indices)
+                    products[--index]
+                else if (index == 0 )
+                    products[products.lastIndex]
+                else if (products[index].quantity <= 0)
+                    browseProducts(products,index,key)
+                else products[index]
+            }//TODO("check for null products")
+            KEY_UP -> {
+                if (index + 1 in products.indices)
+                    products[++index]
+                else if (index == products.lastIndex)
+                        products[0]
+                else if (products[index].quantity <= 0)
+                    browseProducts(products,index,key)
+                else products[index]
+            }
             else -> products[index]
         }
     }
 
 
     /**
-     * Function that...TODO
-     */
-    private fun Char.toInteger(): Int = this - '0'
-
-
-    /**
-     * Function that...TODO
+     * Function that has the sell product Protocol.
+     * @param selectedProduct Selected product to sell.
+     * @return Returns a [Operation.REQUESTS] if there is any.
      */
     private fun sellProduct(selectedProduct: Products.Product): String? {
         TUI.printSell(selectedProduct, selectedProduct.price)
@@ -181,8 +198,9 @@ object Vending {
  * Main function for testing the class.
  */
 fun main() {
-    Vending.blocksInit()
+    App.allBlocksInit()
+    val mode = Mode.INDEX
     while (true) {
-        Vending.printInitialMenu()
+        Vending.run(mode)
     }
 }

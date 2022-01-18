@@ -167,7 +167,7 @@ object LCD {
             cursor += LINE_CELLS
         //Command to place the cursor in the right place.
         //writeCMD(SET_CGRAM_ADDRESS or cursor)
-        setCGRAMaddress(cursor)
+        setGRAMAddress(cursor)
     }
 
     /**
@@ -180,16 +180,18 @@ object LCD {
     //Extra----------------
 
     /**
-     * Function that...TODO
+     * Function that sends a command to set the DDRAM address for the [address] that is passed as a param.
+     * @param address Address to set the DDRAM.
      */
-    fun setDDRAMAddress(address: Int) {
+    private fun setDDRAMAddress(address: Int) {
         writeCMD((1 shl 7) or address)
     }
 
     /**
-     * Function that...TODO
+     * Function that sends a command to set the CGRAM address for the [address] that is passed as a param.
+     * @param address Address to set the CGRAM.
      */
-    fun setCGRAMaddress(address: Int) {
+    private fun setGRAMAddress(address: Int) {
         writeCMD(SET_CGRAM_ADDRESS or address)
     }
 

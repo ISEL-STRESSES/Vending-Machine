@@ -7,7 +7,7 @@ import isel.leic.utils.Time
 import java.text.SimpleDateFormat
 
 /**
- * TODO
+ * Interface that implements a Clock to our Vending Machine.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
  */
 object Time {
@@ -47,11 +47,21 @@ object Time {
      */
     fun Long.secsToTime(): String = dateFormat.format(this)
 
+
+    /**
+     * Function that give only the current date of the Vending Machine.
+     * @return Returns the current date of the Vending Machine.
+     */
     fun getDate(): String {
         val time = getCurrentTime().secsToTime()
         return time.dropLast(HOUR_SIZE)
     }
 
+
+    /**
+     * Function that give only the current time of the Vending Machine.
+     * @return Returns the current time of the Vending Machine.
+     */
     fun getTime(): String {
         val time = getCurrentTime().secsToTime()
         return time.drop(DATE_SIZE)

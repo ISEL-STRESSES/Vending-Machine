@@ -1,17 +1,32 @@
+
 /**
- * TODO
+ * Interface that implements communication between the LCD and the KBD.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
  */
 object TUI {
     //£$€₿♫
-    private const val LINE_SIZE = 64
-    private const val TIME_OUT = 1000L
-    private var TUI_STATE = false //
+    //Variable Initialization.
+    private const val LINE_SIZE = 64            //Max line size in the LCD(Addresses).
+    private const val DEFAULT_TIME_OUT = 1000L  //Default Time out for waiting for a key.
+    private const val INITIAL_POSITION = 0      //Initial cell position on any line.
+    private const val FIRST_LINE = 0            //First Line in the LCD.
+    private const val SECOND_LINE = 1           //Second Line in the LCD.
+    private const val DEFAULT_NUMBER_SIZE = 2   //Default number size to write in the LCD.
+    private const val FILL_CHARACTER = '0'      //Character to fill if the Number Size is less than [DEFAULT_NUMBER_SIZE].
+    private const val QUANTITY_INDICATOR = '#'  //Quantity indicator.
+    const val NONE = KBD.NONE                   //NONE char of KBD
+    private var TUI_STATE = false               //Current State of Products(if it was already initialized).
 
-    enum class Position { CENTER, LEFT, RIGHT }
 
     /**
-     * Function that...TODO
+     * Enumerate that Represents all the valid position on the Display for writing.
+     */
+    enum class Position { CENTER, LEFT, RIGHT }
+
+
+    /**
+     * Function that initializes the class of the TUI.
+     * If it was already initialized exists the function.
      */
     fun init() {
         if (TUI_STATE) return
@@ -23,8 +38,9 @@ object TUI {
         TUI_STATE = true
     }
 
+
     /**
-     * function that prints the information of a [product] on the LCD, if it doesn't have any quantity
+     * Function that prints the information of a [product] on the LCD, if it doesn't have any quantity
      * available prints "Product not available".
      * @param product Product to print information about.
      */
@@ -32,38 +48,58 @@ object TUI {
         clearLCD()
 
         if (product.quantity <= 0) {
-            printText("Product ${product.id}", Position.CENTER, 0)
-            printText("not available", Position.CENTER, 1)
-            println(product)
+            printUnavailableProduct(product)
+        } else {
+            printText(product.name, Position.CENTER, FIRST_LINE)
+            printText(product.id.toFilledString(), Position.LEFT, SECOND_LINE)
+            printText(QUANTITY_INDICATOR + product.quantity.toFilledString(), Position.CENTER, SECOND_LINE)
+            printText(product.price.toFilledString(), Position.RIGHT, SECOND_LINE)
         }
+    }
 
-        printText(product.name, Position.CENTER, 0)
-        printText(product.id.toString().padStart(2, '0'), Position.LEFT, 1)
-        printText("#" + product.quantity.toString().padStart(2, '0'), Position.CENTER, 1)
-        printText(product.price.toString().padStart(2, '0'), Position.RIGHT, 1)
+
+    /**
+     * Function that adds the Fill Character if it doesn't have the minimum size.
+     * @receiver Integer to convert to String and Fill character if needed.
+     * @return Returns a string filled if needed.
+     */
+    private fun Int.toFilledString(): String {
+        return this.toString().padStart(DEFAULT_NUMBER_SIZE, FILL_CHARACTER)
+    }
+
+
+    /**
+     * Function that prints an unavailable product.
+     * @param product Unavailable product to Print.
+     */
+    private fun printUnavailableProduct(product: Products.Product) {
+        printText("Product ${product.id}", Position.CENTER, FIRST_LINE)
+        printText("not available", Position.CENTER, SECOND_LINE)
+        println(product)
     }
 
 
     /**
      * Function that prints the process of the sale.
-     * @param product
-     * @param price
+     * @param product Product to print during sale.
+     * @param price Price of the product.
      */
     fun printSell(product: Products.Product, price: Int) {
         clearLCD()
-        printText(product.name, Position.CENTER, 0)
-        printText(price.toString(), Position.CENTER, 1)
+        printText(product.name, Position.CENTER, FIRST_LINE)
+        printText(price.toString(), Position.CENTER, SECOND_LINE)
     }
 
 
     /**
-     * Function that...TODO
+     * Function that prints in the LCD a Canceled Sale.
+     * @param coins Coins to be returned.
      */
     fun printCancel(coins: Int) {
         clearLCD()
-        printText("Vending Aborted", Position.CENTER, 0)
+        printText("Vending Aborted", Position.CENTER, FIRST_LINE)
         if (coins > 0)
-            printText("Return $coins", Position.CENTER, 1)
+            printText("Return $coins", Position.CENTER, SECOND_LINE)
     }
 
 
@@ -71,72 +107,98 @@ object TUI {
      * Function that prints the confirmation of Shutdown on the LCD.
      */
     fun printShutdown() {
-        printText("Shutdown", Position.CENTER, 0)
-        printText("5-Yes", line = 1)
-        printText("other-No", Position.RIGHT, 1)
+        printText("Shutdown", Position.CENTER, FIRST_LINE)
+        printText("5-Yes", Position.LEFT, FIRST_LINE)
+        printText("other-No", Position.RIGHT, SECOND_LINE)
     }
 
 
     /**
-     * Function that...TODO
+     * Function that allows to print text in several Positions on the LCD.
+     * @param text Text to write in the LCD.
+     * @param position Position to place the cursor to write, by default is [Position.LEFT].
+     * @param line Line to write the [text].
      */
-    fun printText(text: String, position: Position = Position.LEFT, line: Int) {
-        val textSize = text.length
-        val middle = LCD.COLUMNS / 2 - textSize / 2
+    fun printText(text: String, position: Position, line: Int) {
+        //if somehow we forget some space in the beginning or end.
+        val cleanedText = text.trim()
+        val textSize = cleanedText.length
+        val middle = (LCD.COLUMNS / 2) - (textSize / 2)
         when (position) {
             Position.CENTER -> {
                 LCD.cursor(line, if (textSize % 2 == 0) middle else middle - 1)
-                LCD.write(text, false)
+                LCD.write(cleanedText)
             }
-            Position.RIGHT -> { //TODO("MAIS BONITA")
+
+            Position.RIGHT -> {
                 LCD.cursor(line, LCD.COLUMNS - textSize)
-                LCD.write(text, false)
+                LCD.write(cleanedText)
             }
+
             else -> {
-                LCD.cursor(line, 0)
-                LCD.write(text, false)
+                LCD.cursor(line, INITIAL_POSITION)
+                LCD.write(cleanedText)
             }
         }
     }
 
+
     /**
-     * Function that...TODO
+     * Function that clears a line in the LCD.
+     * @param line Line to be cleared.
      */
     private fun clearLine(line: Int) {
         repeat(LINE_SIZE) {
             LCD.cursor(line, it)
-            LCD.write(" ", false)
+            LCD.write(" ")
         }
     }
+
 
     /**
      * Function that cleans the hole LCD.
      */
     fun clearLCD() {
-        clearLine(0)
-        clearLine(1)
+        clearLine(FIRST_LINE)
+        clearLine(SECOND_LINE)
     }
 
+
     /**
-     * Function that...TODO
+     * Function that translates an KBD key into it's integer representation, if it has one.
+     * @param timeout Timeout to wait for a key.
+     * @return a Key in its integer representation.
      */
     fun getInt(timeout: Long): Int {
         var value = 0
-        val intToInsert = KBD.waitKey(timeout)
+        val kbdInt = getKBDKey(timeout)
 
-        if (intToInsert in (KBD.keys.filter { it != '#' && it != '*' }))
-            value = intToInsert.toString().toInt()
+        if (kbdInt in (KBD.keys.filter { it != '#' && it != '*' }))
+            value = kbdInt.toInteger()
 
         val newInt = KBD.waitKey(timeout)
         if (newInt in (KBD.keys.filter { it != '#' && it != '*' }))
-            value = (value shl 1) or newInt.toString().toInt()
+            value = (value shl 1) or newInt.toInteger()
         return value
     }
 
+
     /**
-     * Function that...TODO
+     * Function that converts a Char to Integer.
+     * @receiver Char to convert.
+     * @return Char Converted.
      */
-    fun getKBDKey(timeOut: Long = TIME_OUT): Char {
+    fun Char.toInteger(): Int{
+        return this - '0'
+    }
+
+
+    /**
+     * Function that gets any key pressed in the Keyboard.
+     * @param timeOut Timeout to wait for a Key, by default is [DEFAULT_TIME_OUT].
+     * @return The char representation of the key.
+     */
+    fun getKBDKey(timeOut: Long = DEFAULT_TIME_OUT): Char {
         return KBD.waitKey(timeOut)
     }
 
@@ -151,8 +213,8 @@ fun main() {
     LCD.init()
     KBD.init()
     TUI.init()
-    TUI.printText("darta-cao", line = 0)
-    TUI.printText("Julieta", TUI.Position.CENTER, 1)
-    TUI.printText("BZ", line = 0)
+    TUI.printText("Example", TUI.Position.CENTER, 0)
+    TUI.printText("Example2", TUI.Position.CENTER, 1)
+    //TUI.printText("BZ", line = 0)
 
 }

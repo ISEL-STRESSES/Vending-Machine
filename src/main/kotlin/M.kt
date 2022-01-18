@@ -4,7 +4,7 @@
  */
 object M {
     //Variable initialization.
-    private const val M_MASK = 0x80     //Mask to read the Maintenance signal.
+    private const val M_MASK =0x80     //Mask to read the Maintenance signal.
     private var M_STATE = false         //Current State of M(if it was already initialized).
 
 

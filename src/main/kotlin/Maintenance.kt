@@ -3,19 +3,32 @@ import kotlin.system.exitProcess
 
 
 /**
- * TODO
+ * Class that implements the Maintenance routine.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
  */
 object Maintenance {
+    //Variable initialization.
+    private var OPTIONS_INDEX = 0           //Current Index in the options Array.
+    private const val WAIT_TIME = 500L      //Default wait time for getting an KBD key.
+    private var MAINTENANCE_STATE = false   //Current State of Maintenance(if it was already initialized).
+
+    //Array of available Options.
     private val OPTIONS = arrayOf("1-Dispense Test ", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
-    private const val WAIT_TIME = 500L
+
+    /**
+     * Function that initializes the class of the Maintenance.
+     * If it was already initialized exists the function.
+     */
     fun init() {
-        Vending.blocksInit()
+        if (MAINTENANCE_STATE) return
+        App.allBlocksInit()
+        MAINTENANCE_STATE = true
     }
 
     /**
      * Function that saves the products and its properties as well as the number of coins introduced during functioning.
-     * TODO
+     * @param array Array of Products to save records.
+     * @param coins Array of Coins to save records.
      */
     private fun printSystemOut(array: Array<Products.Product>, coins: Array<CoinDeposit.Coin>) {
         TUI.printShutdown()
@@ -29,17 +42,18 @@ object Maintenance {
 
 
     /**
-     * Function that...TODO
+     * Function that allows to toggle through Maintenance [OPTIONS].
      */
     private fun toggleThroughOptions() {
-        var index = 0
-        TUI.printText(OPTIONS[index++], line = 1)
+        TUI.printText(OPTIONS[OPTIONS_INDEX++],TUI.Position.LEFT, 1)
         Time.sleep(WAIT_TIME)
+        if (OPTIONS_INDEX == OPTIONS.size)
+            OPTIONS_INDEX = OPTIONS.indices.first
     }
 
 
     /**
-     * Function that...TODO
+     * Function that prints maintenance menu.
      */
     private fun printMaintenance() {
         TUI.clearLCD()
@@ -50,7 +64,8 @@ object Maintenance {
 
 
     /**
-     * Function that...TODO
+     * Function that has the routine of the Maintenance Mode.
+     * @param mode Mode needed for the [dispenseTest].
      */
     fun runMaintenance(mode: Mode) {
         printMaintenance()
@@ -89,6 +104,7 @@ object Maintenance {
 
     /**
      * Function that...TODO
+     * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
      */
     private fun dispenseTest(mode: Mode) {
         TODO("Not yet implemented")

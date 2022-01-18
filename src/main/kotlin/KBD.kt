@@ -9,7 +9,7 @@ object KBD {
 
     //Variable initialization
     private const val READ_MASK = 0x0F  //Mask to read a key.
-    private const val DVAL_MASK = 0x10  //Mask to check if a key is valid.
+    private const val DVAL_MASK =0x10  //Mask to check if a key is valid.
     private const val ACK = 0x80        //Acknowledge to send if a key is received.
     const val NONE = 0.toChar()         //Value that represents a non-existent key.
     private var KBD_STATE = false       //Current State of KBD(if it was already initialized).

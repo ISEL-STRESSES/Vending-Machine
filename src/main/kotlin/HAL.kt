@@ -76,7 +76,8 @@ object HAL {
 
 
     /**
-     * Function that...TODO
+     * Function that inverts a [value] for the USBPort.
+     * @param value Value to invert.
      */
     private fun usbPortOut(value: Int) {
         UsbPort.out(value.inv())
@@ -84,7 +85,8 @@ object HAL {
 
 
     /**
-     * Function that...TODO
+     * Function that inverts the input of the USBPort.
+     * @return Value of the USBPort In inverted.
      */
     private fun usbPortIn(): Int {
         return UsbPort.`in`().inv()

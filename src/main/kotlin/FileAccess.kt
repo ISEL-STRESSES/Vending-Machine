@@ -36,7 +36,7 @@ object FileAccess {
      * Function that reads the [COIN_LOG] file.
      * @return Array of strings that represent each line on the file.
      */
-    fun readCoinFile(): Array<String> {
+    fun readCoinFile():Array<String> {
         return readFile(COIN_LOG)
     }
 
