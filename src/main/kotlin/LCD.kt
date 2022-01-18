@@ -184,7 +184,7 @@ object LCD {
      * @param address Address to set the DDRAM.
      */
     private fun setDDRAMAddress(address: Int) {
-        writeCMD((1 shl 7) or address)
+        writeCMD((1 shl 6) or address)
     }
 
     /**
@@ -194,6 +194,21 @@ object LCD {
     private fun setGRAMAddress(address: Int) {
         writeCMD(SET_CGRAM_ADDRESS or address)
     }
+
+
+    /**
+     *
+     */
+    fun loadChar(position: Int, char: IntArray) {
+        repeat(8) { // Linha a linha
+            // Shift da posição para os 3 high bits, somar com linha atual
+            setDDRAMAddress(position.shl(3) + it)
+            // Aceder aos bits da linha atual do caracter
+            writeDATA(char[it])
+        }
+        writeCMD(0x02)//RETURN HOME COMMAND // Colocar o cursor na posição inicial (0, 0), forçando um comando de setDDRAM
+    }
+
 
 }
 

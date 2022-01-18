@@ -4,8 +4,13 @@
  */
 object Products {
     //Variable Initialization.
-    var products: Array<Product> = emptyArray()     //Log of the Product file.
-    private var PRODUCTS_STATE = false              //Current State of Products(if it was already initialized).
+    var products: Array<Product?> = emptyArray()     // Log of the Product file.
+    private const val ID_INDEX = 0                  // TODO: 18/01/2022 comments
+    private const val NAME_INDEX = 1                //
+    private const val QUANTITY_INDEX = 2            //
+    private const val PRICE_INDEX = 3               //
+    private const val DELIMITER = ';'               //
+    private var PRODUCTS_STATE = false              // Current State of Products(if it was already initialized).
 
     /**
      * Class that represents a [Product] and all its properties.
@@ -34,11 +39,18 @@ object Products {
      * transforms it to into an array of [Product].
      * @return Array of Products after reading the Products file.
      */
-    private fun vendingProducts(): Array<Product> {
+    private fun vendingProducts(): Array<Product?> {
         val file = FileAccess.readProductFile()
         val products = Array(file.size) {
-            val product = file[it].split(';')
-            Product(product[0].toInt(), product[1], product[2].toInt(), product[3].toInt())
+            val product = file[it].split(DELIMITER)
+            if (it == product[ID_INDEX].toInt())
+                Product(
+                    id = product[ID_INDEX].toInt(),
+                    name = product[NAME_INDEX],
+                    quantity = product[QUANTITY_INDEX].toInt(),
+                    price = product[PRICE_INDEX].toInt()
+                )
+            else null
         }
         return products
     }
@@ -48,13 +60,20 @@ object Products {
      * Function that saves the array of [Product] into a file for log.
      * @param array Array of Products to Store information.
      */
-    fun saveProducts(array: Array<Product>) {
-        val newArray = Array(array.size) { "" }
-        for (i in array.indices) {
-            val line = "${array[i].id};${array[i].name};${array[i].quantity};${array[i].price}"
-            newArray[i] = line
-        }
+    fun saveProducts(array: Array<Product?>) {
+        var size = 0
+        for (i in array.indices)
+            if (array[i] != null)
+                size++
 
+        val newArray = Array(size) { "" }
+        for (i in array.indices) {
+            val element = array[i]
+            if (element != null) {
+                val line = "${element.id};${element.name};${element.quantity};${element.price}"
+                newArray[i] = line
+            }
+        }
         FileAccess.writeProductFile(newArray)
     }
 
@@ -65,19 +84,19 @@ object Products {
      * @param quantity quantity to add to a [Product].
      * @return Returns the original product with the new quantity.
      */
-    fun Product.addQuantity(quantity: Int): Product {
-        return this.copy(quantity = this.quantity + quantity)
+    fun Product.changeQuantity(quantity: Int): Product {
+        return this.copy(quantity = quantity)
     }
 
 
-    /**
-     * Function that removes a certain quantity to a Product.
-     * @receiver Product to take [quantity].
-     * @param quantity quantity to take to a [Product].
-     * @return Returns the original product with the new quantity.
-     */
-    fun Product.takeQuantity(quantity: Int): Product {
-        return this.copy(quantity = this.quantity - quantity)
-    }
+//    /**
+//     * Function that removes a certain quantity to a Product.
+//     * @receiver Product to take [quantity].
+//     * @param quantity quantity to take to a [Product].
+//     * @return Returns the original product with the new quantity.
+//     */
+//    fun Product.takeQuantity(quantity: Int): Product {
+//        return this.copy(quantity = this.quantity - quantity)
+//    }
 
 }

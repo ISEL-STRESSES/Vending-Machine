@@ -1,4 +1,3 @@
-import TUI.toInteger
 import Time.secsToTime
 
 /**
@@ -8,10 +7,8 @@ import Time.secsToTime
 object Vending {
     //Variable initialization.
     private const val TIME_OUT = 5000L          //Time to wait for a key.
-    private const val KEY_UP = 2                //Key to use as up arrow.
-    private const val KEY_DOWN = 8              //Key to use as down arrow.
-    private var force = true                    //Flag that indicates if is needed to print again the initial menu.
-    private val KEY_INTERVAL = ('0'..'9') //Interval of integer keys.
+    private const val SELL_TIME_OUT = 1000L
+    var force = true                    //Flag that indicates if is needed to print again the initial menu.
     private var VENDING_STATE = false           //Current State of Vending(if it was already initialized).
 
 
@@ -52,7 +49,7 @@ object Vending {
 
     /**
      * Function that has the routine of the Vending Mode.
-     * @param mode Mode needed for the [pickProduct].
+     * @param mode Mode needed for the [App.pickProduct].
      * @return Returns requests if there is any
      */
     fun run(mode: Mode): String? {
@@ -61,7 +58,7 @@ object Vending {
         var pickedProduct: Products.Product? = null
 
         if (TUI.getKBDKey(TIME_OUT) == '#')
-            pickedProduct = pickProduct(mode, Products.products)
+            pickedProduct = App.pickProduct(mode, Products.products)
 
         if (pickedProduct != null) {
             return sellProduct(pickedProduct)
@@ -69,86 +66,6 @@ object Vending {
         }
 
         return null
-    }
-
-
-    /**
-     * Function that has the pick product protocol of the Vending Machine.
-     * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
-     * @param products Array that has all the product of the Vending Machine.
-     * @return Returns a picked Product or null if the sequence wasn't right.
-     */
-    private fun pickProduct(mode: Mode, products: Array<Products.Product>): Products.Product? {
-
-        var currentMode = mode
-        var key: Char
-
-        var product = products.first { it.quantity > 0 }
-        TUI.printProduct(product)
-        var index = product.id
-
-        while (TUI.getKBDKey(TIME_OUT).also { key = it } != TUI.NONE) {
-
-            println(key)
-            when (key) {
-                '*' -> currentMode = currentMode.switchMode()
-                '#' -> if (product.quantity > 0) return product
-                in KEY_INTERVAL -> {
-                    if (currentMode == Mode.INDEX) {
-                        product = products[key.toInteger()]
-                        index = product.id
-                    } else {
-                        product = browseProducts(products, index, key)
-                        index = product.id
-                    }
-
-                }
-            }
-            TUI.printProduct(product)
-        }
-        force = true
-        return null
-    }
-
-
-    /**
-     * Function that toggles trough modes
-     * @receiver [Mode] current mode.
-     * @return new mode.
-     */
-    private fun Mode.switchMode(): Mode = if (this == Mode.INDEX) Mode.ARROWS else Mode.INDEX
-
-
-    /**
-     * Function that browses troth all the products of the vending Machine.
-     * @param products Array of all Products.
-     * @param currentIndex Current index of the product.
-     * @param key Key to check if is available for [Mode.ARROWS].
-     * @return Returns a product after one key pressed.
-     */
-    private fun browseProducts(products: Array<Products.Product>, currentIndex: Int = 0, key: Char): Products.Product {
-        var index = currentIndex
-        return when (key.toInteger()) {
-            KEY_DOWN -> {
-                if (index - 1 in products.indices)
-                    products[--index]
-                else if (index == 0 )
-                    products[products.lastIndex]
-                else if (products[index].quantity <= 0)
-                    browseProducts(products,index,key)
-                else products[index]
-            }//TODO("check for null products")
-            KEY_UP -> {
-                if (index + 1 in products.indices)
-                    products[++index]
-                else if (index == products.lastIndex)
-                        products[0]
-                else if (products[index].quantity <= 0)
-                    browseProducts(products,index,key)
-                else products[index]
-            }
-            else -> products[index]
-        }
     }
 
 
@@ -161,7 +78,7 @@ object Vending {
         TUI.printSell(selectedProduct, selectedProduct.price)
         var coinsInserted = 0
         while (coinsInserted < selectedProduct.price) {
-            if (TUI.getKBDKey(TIME_OUT) == '#') {
+            if (TUI.getKBDKey(SELL_TIME_OUT) == '#') {
                 TUI.printCancel(coinsInserted)
                 CoinAcceptor.ejectCoins()
                 break
@@ -176,7 +93,7 @@ object Vending {
                 TUI.printText("Collect Product", TUI.Position.CENTER, 1)
                 CoinAcceptor.collectCoins()
                 Dispenser.dispense(selectedProduct.id)
-                Products.products[selectedProduct.id].quantity--
+                Products.products[selectedProduct.id]!!.quantity--
                 CoinDeposit.COINS += coinsInserted
                 break
             }

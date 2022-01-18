@@ -1,3 +1,5 @@
+import Products.changeQuantity
+import TUI.toInteger
 import isel.leic.utils.Time
 import kotlin.system.exitProcess
 
@@ -9,11 +11,12 @@ import kotlin.system.exitProcess
 object Maintenance {
     //Variable initialization.
     private var OPTIONS_INDEX = 0           //Current Index in the options Array.
-    private const val WAIT_TIME = 500L      //Default wait time for getting an KBD key.
+    private const val WAIT_TIME = 5000L      //Default wait time for getting an KBD key.
+    private const val TOGGLE_TIME = 1000L
     private var MAINTENANCE_STATE = false   //Current State of Maintenance(if it was already initialized).
 
     //Array of available Options.
-    private val OPTIONS = arrayOf("1-Dispense Test ", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
+    val OPTIONS = arrayOf("1-Dispense Test", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
 
     /**
      * Function that initializes the class of the Maintenance.
@@ -30,7 +33,7 @@ object Maintenance {
      * @param array Array of Products to save records.
      * @param coins Array of Coins to save records.
      */
-    private fun printSystemOut(array: Array<Products.Product>, coins: Array<CoinDeposit.Coin>) {
+    private fun printSystemOut(array: Array<Products.Product?>, coins: Array<CoinDeposit.Coin>) {
         TUI.printShutdown()
         val key = TUI.getKBDKey(WAIT_TIME)
         if (key == '5') {
@@ -46,7 +49,7 @@ object Maintenance {
      */
     private fun toggleThroughOptions() {
         TUI.printText(OPTIONS[OPTIONS_INDEX++],TUI.Position.LEFT, 1)
-        Time.sleep(WAIT_TIME)
+        Time.sleep(TOGGLE_TIME)
         if (OPTIONS_INDEX == OPTIONS.size)
             OPTIONS_INDEX = OPTIONS.indices.first
     }
@@ -70,45 +73,54 @@ object Maintenance {
     fun runMaintenance(mode: Mode) {
         printMaintenance()
         when (TUI.getKBDKey(WAIT_TIME)) {
-            '1' -> {
-                dispenseTest(mode)
-            }
-            '2' -> {
-                updateProduct()
-            }
-            '3' -> {
-                removeProduct()
-            }
-            '4' -> {
-                printSystemOut(Products.products, CoinDeposit.COINS_LOG)
-            }
+            '1' -> { dispenseTest(mode) }
+            '2' -> { updateProduct(mode) }
+            '3' -> { removeProduct(mode) }
+            '4' -> { printSystemOut(Products.products, CoinDeposit.COINS_LOG) }
         }
     }
 
 
     /**
-     * Function that...TODO
+     * Function that changes the quantity of a product in the Vending Machine.
+     * @param mode Mode to browse trough products.
      */
-    private fun updateProduct() {
-        TODO("Not yet implemented")
+    private fun updateProduct(mode: Mode) {
+        val product = App.pickProduct(mode,Products.products) ?: return
+        var key :Int
+        while (TUI.getInt(WAIT_TIME).also { key = it } != TUI.NONE.toInteger()) {
+            Products.products[product.id] = product.changeQuantity(key)
+        }
+
     }
 
 
     /**
-     * Function that...TODO
+     * Function that removes a product form visualization. // TODO(it takes its quantity?)
      */
-    private fun removeProduct() {
-        TODO("Not yet implemented")
+    private fun removeProduct(mode: Mode) {
+        val product = App.pickProduct(mode, Products.products) ?: return
+        Products.products[product.id] = null
     }
 
 
     /**
-     * Function that...TODO
+     * Function that tests the dispensing of a product.
      * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
      */
     private fun dispenseTest(mode: Mode) {
-        TODO("Not yet implemented")
+        val product = App.pickProduct(mode,Products.products) ?: return
+        TUI.printMaintenanceSell(product)
+        while (true) {
+            if (TUI.getKBDKey(WAIT_TIME) == '*')
+                break
+        }
+        TUI.printText("Collect Product", TUI.Position.CENTER, 1)
+        Dispenser.dispense(product.id)
     }
 
 
+}
+fun main() {
+    Maintenance.OPTIONS.forEach{ println(it.length) }
 }

@@ -1,10 +1,10 @@
+import java.awt.List
 
 /**
  * Interface that implements communication between the LCD and the KBD.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
  */
 object TUI {
-    //£$€₿♫
     //Variable Initialization.
     private const val LINE_SIZE = 64            //Max line size in the LCD(Addresses).
     private const val DEFAULT_TIME_OUT = 1000L  //Default Time out for waiting for a key.
@@ -16,8 +16,29 @@ object TUI {
     private const val QUANTITY_INDICATOR = '#'  //Quantity indicator.
     const val NONE = KBD.NONE                   //NONE char of KBD
     private var TUI_STATE = false               //Current State of Products(if it was already initialized).
-
-
+    //new chars £$€₿♫
+    private const val BITCOIN_CHAR_CODE = 0
+    private val BITCOIN_MAP = intArrayOf(
+        0b01010,
+        0b11110,
+        0b01011,
+        0b01110,
+        0b01011,
+        0b11110,
+        0b01010,
+        0b00000
+    )
+    private val ARROW_MAP = intArrayOf(
+        0b00100,
+        0b01110,
+        0b11111,
+        0b00100,
+        0b11111,
+        0b01110,
+        0b00100,
+        0b00000
+    )
+    //data class Character (val position: Int, val map:IntArray)
     /**
      * Enumerate that Represents all the valid position on the Display for writing.
      */
@@ -34,7 +55,8 @@ object TUI {
         SerialEmitter.init()
         LCD.init()
         KBD.init()
-        //...
+        LCD.loadChar(0, BITCOIN_MAP)
+        LCD.loadChar(1, ARROW_MAP)
         TUI_STATE = true
     }
 
@@ -44,16 +66,16 @@ object TUI {
      * available prints "Product not available".
      * @param product Product to print information about.
      */
-    fun printProduct(product: Products.Product) {
+    fun printProduct(product: Products.Product?) {
         clearLCD()
 
-        if (product.quantity <= 0) {
+        if (product == null || product.quantity <= 0) {
             printUnavailableProduct(product)
         } else {
             printText(product.name, Position.CENTER, FIRST_LINE)
             printText(product.id.toFilledString(), Position.LEFT, SECOND_LINE)
             printText(QUANTITY_INDICATOR + product.quantity.toFilledString(), Position.CENTER, SECOND_LINE)
-            printText(product.price.toFilledString(), Position.RIGHT, SECOND_LINE)
+            printText(BITCOIN_CHAR_CODE.toChar() + product.price.toFilledString(), Position.RIGHT, SECOND_LINE)
         }
     }
 
@@ -72,8 +94,8 @@ object TUI {
      * Function that prints an unavailable product.
      * @param product Unavailable product to Print.
      */
-    private fun printUnavailableProduct(product: Products.Product) {
-        printText("Product ${product.id}", Position.CENTER, FIRST_LINE)
+    private fun printUnavailableProduct(product: Products.Product?) {
+        printText("Product ${product?.id ?: ""}", Position.CENTER, FIRST_LINE)
         printText("not available", Position.CENTER, SECOND_LINE)
         println(product)
     }
@@ -88,6 +110,12 @@ object TUI {
         clearLCD()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText(price.toString(), Position.CENTER, SECOND_LINE)
+    }
+
+    fun printMaintenanceSell(product: Products.Product){
+        clearLCD()
+        printText(product.name, Position.CENTER, FIRST_LINE)
+        printText("*- To Print",Position.CENTER, SECOND_LINE)
     }
 
 
