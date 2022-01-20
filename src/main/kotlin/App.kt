@@ -10,6 +10,7 @@ object App {
     private const val KEY_UP = 2                //Key to use as up arrow.
     private const val KEY_DOWN = 8              //Key to use as down arrow.
     private val KEY_INTERVAL = ('0'..'9') //Interval of integer keys.
+    private var ERROR = false
     private var force = Vending.force
     private var APP_STATE = false   //Current State of App(if it was already initialized).
 
@@ -46,7 +47,13 @@ object App {
         var currentMode = mode
         var key: Char
 
-        var product = products.first { it != null && it.quantity > 0 } ?: return null
+        var product = products.first { it != null && it.quantity > 0 }
+        if (product == null) {
+            TUI.printText("OUT OF SERVICE", TUI.Position.CENTER, 0)
+            TUI.printText("Unavailable Prod",TUI.Position.CENTER,1)
+            ERROR = true
+            return null
+        }
         TUI.printProduct(product)
         var index = product.id
 
@@ -55,7 +62,7 @@ object App {
 
             when (key) {
                 '*' -> currentMode = currentMode.switchMode()
-                '#' -> if (product.quantity > 0) return product
+                '#' -> if (product?.quantity!! > 0) return product
                 in KEY_INTERVAL -> {
                     if (currentMode == Mode.INDEX) {
                         product = products[key.toInteger()]!!
@@ -98,7 +105,7 @@ object App {
                     index - 1 in products.indices -> products[--index]
                     index == 0 -> products[products.lastIndex]
                     products[index] == null -> null
-                    products[index].quantity <= 0 -> browseProducts(products,index,key)
+                    products[index]?.quantity!! <= 0 -> browseProducts(products,index,key)
                     else -> products[index]
                 }
             }//TODO("check for null products")
@@ -107,7 +114,7 @@ object App {
                     index + 1 in products.indices -> products[++index]
                     index == products.lastIndex -> products[0]
                     products[index] == null -> null
-                    products[index].quantity <= 0 -> browseProducts(products,index,key)
+                    products[index]?.quantity!! <= 0 -> browseProducts(products,index,key)
                     else -> products[index]
                 }
             }
