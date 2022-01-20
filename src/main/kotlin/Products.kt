@@ -4,13 +4,14 @@
  */
 object Products {
     //Variable Initialization.
-    var products: Array<Product?> = emptyArray()     // Log of the Product file.
-    private const val ID_INDEX = 0                  // TODO: 18/01/2022 comments
-    private const val NAME_INDEX = 1                //
-    private const val QUANTITY_INDEX = 2            //
-    private const val PRICE_INDEX = 3               //
-    private const val DELIMITER = ';'               //
-    private var PRODUCTS_STATE = false              // Current State of Products(if it was already initialized).
+    private const val MACHINE_MAX_SIZE = 16                         // Vending machine max capacity for products
+    var products: Array<Product?> = arrayOfNulls(MACHINE_MAX_SIZE)  // Log of the Product file.
+    private const val ID_INDEX = 0                                  // Index of the ID field in the file String.
+    private const val NAME_INDEX = 1                                // Index of the name field in the file String.
+    private const val QUANTITY_INDEX = 2                            // Index of the quantity field in the file String.
+    private const val PRICE_INDEX = 3                               // Index of the price field in the file String.
+    private const val DELIMITER = ';'                               // Delimiter of the file String.
+    private var PRODUCTS_STATE = false                              // Current State of Products(if it was already initialized).
 
     /**
      * Class that represents a [Product] and all its properties.
@@ -41,8 +42,9 @@ object Products {
      */
     private fun vendingProducts(): Array<Product?> {
         val file = FileAccess.readProductFile()
-        val products = Array(file.size) {
-            val product = file[it].split(DELIMITER)
+        var idx = 0
+        val products = Array(MACHINE_MAX_SIZE) {
+            val product = file[idx++].split(DELIMITER)
             if (it == product[ID_INDEX].toInt())
                 Product(
                     id = product[ID_INDEX].toInt(),
@@ -50,7 +52,10 @@ object Products {
                     quantity = product[QUANTITY_INDEX].toInt(),
                     price = product[PRICE_INDEX].toInt()
                 )
-            else null
+            else {
+                idx--
+                null
+            }
         }
         return products
     }
@@ -61,18 +66,10 @@ object Products {
      * @param array Array of Products to Store information.
      */
     fun saveProducts(array: Array<Product?>) {
-        var size = 0
-        for (i in array.indices)
-            if (array[i] != null)
-                size++
-
-        val newArray = Array(size) { "" }
-        for (i in array.indices) {
-            val element = array[i]
-            if (element != null) {
-                val line = "${element.id};${element.name};${element.quantity};${element.price}"
-                newArray[i] = line
-            }
+        val aux = array.filterNotNull()
+        val newArray = Array(aux.size){
+            val element = aux[it]
+            "${element.id};${element.name};${element.quantity};${element.price}"
         }
         FileAccess.writeProductFile(newArray)
     }
@@ -88,15 +85,11 @@ object Products {
         return this.copy(quantity = quantity)
     }
 
+}
 
-//    /**
-//     * Function that removes a certain quantity to a Product.
-//     * @receiver Product to take [quantity].
-//     * @param quantity quantity to take to a [Product].
-//     * @return Returns the original product with the new quantity.
-//     */
-//    fun Product.takeQuantity(quantity: Int): Product {
-//        return this.copy(quantity = this.quantity - quantity)
-//    }
-
+fun main () {
+    Products.init()
+    Products.products.forEach(::println)
+    println()
+    Products.saveProducts(Products.products)
 }

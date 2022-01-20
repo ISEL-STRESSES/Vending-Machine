@@ -1,4 +1,4 @@
-import java.awt.List
+import isel.leic.utils.Time
 
 /**
  * Interface that implements communication between the LCD and the KBD.
@@ -18,6 +18,7 @@ object TUI {
     private var TUI_STATE = false               //Current State of Products(if it was already initialized).
     //new chars £$€₿♫
     private const val BITCOIN_CHAR_CODE = 0
+    private const val BITCOIN_CGRAM_POSITION = 0
     private val BITCOIN_MAP = intArrayOf(
         0b01010,
         0b11110,
@@ -28,6 +29,8 @@ object TUI {
         0b01010,
         0b00000
     )
+    private const val ARROW_CHAR_CODE = 1
+    private const val ARROW_CGRAM_POSITION = 1
     private val ARROW_MAP = intArrayOf(
         0b00100,
         0b01110,
@@ -55,8 +58,8 @@ object TUI {
         SerialEmitter.init()
         LCD.init()
         KBD.init()
-        LCD.loadChar(0, BITCOIN_MAP)
-        LCD.loadChar(1, ARROW_MAP)
+        LCD.loadChar(BITCOIN_CGRAM_POSITION, BITCOIN_MAP)
+        LCD.loadChar(ARROW_CGRAM_POSITION, ARROW_MAP)
         TUI_STATE = true
     }
 
@@ -66,17 +69,14 @@ object TUI {
      * available prints "Product not available".
      * @param product Product to print information about.
      */
-    fun printProduct(product: Products.Product?) {
+    fun printProduct(product: Products.Product, mode: Mode = Mode.INDEX) {
         clearLCD()
 
-        if (product == null || product.quantity <= 0) {
-            printUnavailableProduct(product)
-        } else {
-            printText(product.name, Position.CENTER, FIRST_LINE)
-            printText(product.id.toFilledString(), Position.LEFT, SECOND_LINE)
-            printText(QUANTITY_INDICATOR + product.quantity.toFilledString(), Position.CENTER, SECOND_LINE)
-            printText(BITCOIN_CHAR_CODE.toChar() + product.price.toFilledString(), Position.RIGHT, SECOND_LINE)
-        }
+        printText(product.name, Position.CENTER, FIRST_LINE)
+        printText( product.id.toFilledString() + if (mode == Mode.ARROWS) ARROW_CHAR_CODE.toChar() else "", Position.LEFT, SECOND_LINE)
+        printText(QUANTITY_INDICATOR + product.quantity.toFilledString(), Position.CENTER, SECOND_LINE)
+        printText(BITCOIN_CHAR_CODE.toChar() + product.price.toFilledString(), Position.RIGHT, SECOND_LINE)
+
     }
 
 
@@ -94,10 +94,31 @@ object TUI {
      * Function that prints an unavailable product.
      * @param product Unavailable product to Print.
      */
-    private fun printUnavailableProduct(product: Products.Product?) {
-        printText("Product ${product?.id ?: ""}", Position.CENTER, FIRST_LINE)
+    fun printUnavailableProduct(product: Products.Product?, index: Int) {
+        clearLCD()
+        printText("Product ${product?.id ?: index}", Position.CENTER, FIRST_LINE)
         printText("not available", Position.CENTER, SECOND_LINE)
         println(product)
+    }
+
+
+    /**
+     *
+     */
+    fun printOutOfService(reason: String) {
+        printText("OUT OF SERVICE", Position.CENTER, FIRST_LINE)
+        printText(reason, Position.CENTER, SECOND_LINE)
+    }
+
+
+    /**
+     *
+     */
+    fun printUpdateQuantity(product: Products.Product) {
+        clearLCD()
+        printText(product.name, Position.CENTER, FIRST_LINE)
+        printText("Qty:??",Position.LEFT, SECOND_LINE)
+        LCD.cursor(SECOND_LINE,4)
     }
 
 
@@ -112,6 +133,16 @@ object TUI {
         printText(price.toString(), Position.CENTER, SECOND_LINE)
     }
 
+    fun printTanks(){
+        clearLCD()
+        printText("Thank you", Position.CENTER, FIRST_LINE)
+        printText("See you again", Position.CENTER, SECOND_LINE)
+        Time.sleep(500L)
+    }
+
+    /**
+     *
+     */
     fun printMaintenanceSell(product: Products.Product){
         clearLCD()
         printText(product.name, Position.CENTER, FIRST_LINE)
@@ -135,8 +166,9 @@ object TUI {
      * Function that prints the confirmation of Shutdown on the LCD.
      */
     fun printShutdown() {
+        clearLCD()
         printText("Shutdown", Position.CENTER, FIRST_LINE)
-        printText("5-Yes", Position.LEFT, FIRST_LINE)
+        printText("5-Yes", Position.LEFT, SECOND_LINE)
         printText("other-No", Position.RIGHT, SECOND_LINE)
     }
 
@@ -147,7 +179,9 @@ object TUI {
      * @param position Position to place the cursor to write, by default is [Position.LEFT].
      * @param line Line to write the [text].
      */
-    fun printText(text: String, position: Position, line: Int) {
+    fun printText(text: String, position: Position, line: Int, clear:Boolean = false) {
+        if (clear)
+            clearLine(line)
         //if somehow we forget some space in the beginning or end.
         val cleanedText = text.trim()
         val textSize = cleanedText.length
@@ -157,12 +191,10 @@ object TUI {
                 LCD.cursor(line, if (textSize % 2 == 0) middle else middle - 1)
                 LCD.write(cleanedText)
             }
-
             Position.RIGHT -> {
                 LCD.cursor(line, LCD.COLUMNS - textSize)
                 LCD.write(cleanedText)
             }
-
             else -> {
                 LCD.cursor(line, INITIAL_POSITION)
                 LCD.write(cleanedText)

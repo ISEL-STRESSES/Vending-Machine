@@ -1,4 +1,5 @@
 import Products.changeQuantity
+import TUI.NONE
 import TUI.toInteger
 import isel.leic.utils.Time
 import kotlin.system.exitProcess
@@ -13,6 +14,12 @@ object Maintenance {
     private var OPTIONS_INDEX = 0           //Current Index in the options Array.
     private const val WAIT_TIME = 5000L      //Default wait time for getting an KBD key.
     private const val TOGGLE_TIME = 1000L
+    private const val CONFIRMATION_SHUTDOWN = '5'
+    private const val DISPENSE_TEST = '1'
+    private const val UPDATE_PRODUCT = '2'
+    private const val REMOVE_PRODUCT = '3'
+    private const val SHUTDOWN = '4'
+    private const val MAINTENANCE_MONEY = '*'
     private var MAINTENANCE_STATE = false   //Current State of Maintenance(if it was already initialized).
 
     //Array of available Options.
@@ -36,7 +43,7 @@ object Maintenance {
     private fun printSystemOut(array: Array<Products.Product?>, coins: Array<CoinDeposit.Coin>) {
         TUI.printShutdown()
         val key = TUI.getKBDKey(WAIT_TIME)
-        if (key == '5') {
+        if (key == CONFIRMATION_SHUTDOWN) {
             CoinDeposit.saveCoins(coins)
             Products.saveProducts(array)
             exitProcess(0)
@@ -73,10 +80,10 @@ object Maintenance {
     fun runMaintenance(mode: Mode) {
         printMaintenance()
         when (TUI.getKBDKey(WAIT_TIME)) {
-            '1' -> { dispenseTest(mode) }
-            '2' -> { updateProduct(mode) }
-            '3' -> { removeProduct(mode) }
-            '4' -> { printSystemOut(Products.products, CoinDeposit.COINS_LOG) }
+            DISPENSE_TEST -> dispenseTest(mode)
+            UPDATE_PRODUCT -> updateProduct(mode)
+            REMOVE_PRODUCT -> removeProduct(mode)
+            SHUTDOWN -> printSystemOut(Products.products, CoinDeposit.COINS_LOG)
         }
     }
 
@@ -86,9 +93,11 @@ object Maintenance {
      * @param mode Mode to browse trough products.
      */
     private fun updateProduct(mode: Mode) {
-        val product = App.pickProduct(mode,Products.products) ?: return
+        val product = App.pickProduct(mode, Products.products, Operation.MAINTENANCE) ?: return
         var key :Int
         while (TUI.getInt(WAIT_TIME).also { key = it } != TUI.NONE.toInteger()) {
+            TUI.printText(product.name,TUI.Position.CENTER,0)
+            TUI.printUpdateQuantity(product)
             Products.products[product.id] = product.changeQuantity(key)
         }
 
@@ -96,7 +105,8 @@ object Maintenance {
 
 
     /**
-     * Function that removes a product form visualization. // TODO(it takes its quantity?)
+     * Function that removes a product form visualization.
+     * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
      */
     private fun removeProduct(mode: Mode) {
         val product = App.pickProduct(mode, Products.products) ?: return
@@ -112,7 +122,7 @@ object Maintenance {
         val product = App.pickProduct(mode,Products.products) ?: return
         TUI.printMaintenanceSell(product)
         while (true) {
-            if (TUI.getKBDKey(WAIT_TIME) == '*')
+            if (TUI.getKBDKey(WAIT_TIME) == MAINTENANCE_MONEY)
                 break
         }
         TUI.printText("Collect Product", TUI.Position.CENTER, 1)
@@ -121,6 +131,11 @@ object Maintenance {
 
 
 }
+
+
+/**
+ *
+ */
 fun main() {
     Maintenance.OPTIONS.forEach{ println(it.length) }
 }

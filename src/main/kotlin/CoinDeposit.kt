@@ -7,7 +7,7 @@ object CoinDeposit {
     //Variable Initialization.
     var COINS: Int = 0                                  //Number of coins in the Vending Machine.
     var COINS_LOG :Array<Coin> = emptyArray()           //Log of the Coin Deposit.
-    private const val COINS_DEPOSIT_MAX_CAPACITY = 10   //Max capacity of the Coin Deposit.
+    private const val COINS_DEPOSIT_MAX_CAPACITY= 10   //Max capacity of the Coin Deposit.
     private var COIN_DEPOSIT_STATE = false              //Current State of Coin Deposit(if it was already initialized).
 
     /**

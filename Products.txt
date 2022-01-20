@@ -1,6 +1,5 @@
 0;Kit-Kat;10;4
 1;Lion;8;3
-2;M&M;12;4
 3;Skittles;5;4
 4;Oreo;5;5
 5;Chips-Ahoy;12;5

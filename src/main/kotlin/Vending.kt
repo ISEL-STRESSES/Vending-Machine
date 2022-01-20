@@ -6,7 +6,7 @@ import Time.secsToTime
  */
 object Vending {
     //Variable initialization.
-    private const val TIME_OUT = 5000L          //Time to wait for a key.
+    private const val TIME_OUT =5000L          //Time to wait for a key.
     private const val SELL_TIME_OUT = 1000L
     var force = true                    //Flag that indicates if is needed to print again the initial menu.
     private var VENDING_STATE = false           //Current State of Vending(if it was already initialized).
@@ -97,12 +97,12 @@ object Vending {
                 CoinDeposit.COINS += coinsInserted
                 break
             }
+            TUI.printTanks()
         }
 
         val depositRequest = CoinDeposit.emptyDepositRequest()
         if (depositRequest != null) {
-            TUI.printText("OUT OF SERVICE", TUI.Position.CENTER, 0)
-            TUI.printText(depositRequest, TUI.Position.CENTER, 1)
+            TUI.printOutOfService(depositRequest)
             return depositRequest
         }
         return null

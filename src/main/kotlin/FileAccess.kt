@@ -10,7 +10,7 @@ object FileAccess {
     //Variable Initialization.
     private const val COIN_LOG = "CoinDeposit.txt"  //Name of the Coin log file.
     private const val PRODUCTS_LOG = "Products.txt" //Name of the file that has every product of the Vending Machine.
-    private var FILE_ACCESS_STATE = false           //Current State of File Access (if it was already initialized).
+    private var FILE_ACCESS_STATE =false           //Current State of File Access (if it was already initialized).
 
     /**
      * Function that initializes the class of the File Access.

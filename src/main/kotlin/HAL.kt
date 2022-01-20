@@ -27,7 +27,7 @@ object HAL {
      * @param mask Mask to check if a bit is One or Zero.
      * @return The representation of that bit in form of a boolean (true or false).
      */
-    fun isBit(mask: Int): Boolean {
+    fun isBit(mask: Int): Boolean{
         require(mask.countOneBits() == 1) { "Mask can only have one set bit" }
         val readBit = readBits(mask)
         return readBit != 0

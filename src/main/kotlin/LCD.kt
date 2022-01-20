@@ -7,7 +7,7 @@ import isel.leic.utils.Time
 object LCD {
 
     //Variable initialization
-    private const val LINES = 2                         //Number of lines available for data printing in display.
+    private const val LINES =2                         //Number of lines available for data printing in display.
     const val COLUMNS = 16                              //Number of columns available for data printing in display.
     private const val WRITE_MASK = 0x0F                 //Mask needed for sending data to the display.
     private const val REGISTER_SELECT = true            //Resister Select value in boolean.

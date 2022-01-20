@@ -15,7 +15,7 @@ object Time {
     private const val TIME_FORMAT = "dd-MM-yyyy HH:mm"      //Time format.
     private const val HOUR_SIZE = 6                         //Length on the Time Format reserved for the hour.
     private const val DATE_SIZE = 11                        //Length on the Time Format reserved for the date.
-    var LAST_TIME = 0L                                      //Last Time since january 1st 1970 in milliseconds.
+    var LAST_TIME =0L                                      //Last Time since january 1st 1970 in milliseconds.
     private val dateFormat = SimpleDateFormat(TIME_FORMAT)  //Date format.
     private var TIME_STATE = false                          //Current State of Time(if it was already initialized).
 
