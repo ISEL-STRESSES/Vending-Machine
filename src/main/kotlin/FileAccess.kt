@@ -1,16 +1,18 @@
+// Imports that allow to read and write files.
 import java.io.BufferedReader
 import java.io.FileReader
 import java.io.PrintWriter
 
 /**
- * Class that allows to read files that have information of the Products and Coins of the Vending Machine.
+ * Class that allows to read files that have information of the Products and Coins
+ * of the Vending Machine.
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
  */
 object FileAccess {
     //Variable Initialization.
-    private const val COIN_LOG = "CoinDeposit.txt"  //Name of the Coin log file.
-    private const val PRODUCTS_LOG = "Products.txt" //Name of the file that has every product of the Vending Machine.
-    private var FILE_ACCESS_STATE =false           //Current State of File Access (if it was already initialized).
+    private const val COIN_LOG = "CoinDeposit.txt"  // Name of the Coin log file.
+    private const val PRODUCTS_LOG = "Products.txt" // Name of the file that has every product of the Vending Machine.
+    private var FILE_ACCESS_STATE = false           // Current State of File Access (if it was already initialized).
 
     /**
      * Function that initializes the class of the File Access.
@@ -22,7 +24,6 @@ object FileAccess {
         FILE_ACCESS_STATE = true
     }
 
-
     /**
      * Function that reads the [PRODUCTS_LOG] file.
      * @return Array of strings that represent each line on the file.
@@ -31,15 +32,13 @@ object FileAccess {
         return readFile(PRODUCTS_LOG)
     }
 
-
     /**
      * Function that reads the [COIN_LOG] file.
      * @return Array of strings that represent each line on the file.
      */
-    fun readCoinFile():Array<String> {
+    fun readCoinFile(): Array<String> {
         return readFile(COIN_LOG)
     }
-
 
     /**
      * Function that writes the Product log.
@@ -49,7 +48,6 @@ object FileAccess {
         writeFile(array, PRODUCTS_LOG)
     }
 
-
     /**
      * Function that writes the Coin log.
      * @param array Array of Strings that have the last information on the Coins.
@@ -57,7 +55,6 @@ object FileAccess {
     fun writeCoinFile(array: Array<String>) {
         writeFile(array, COIN_LOG)
     }
-
 
     /**
      * Function that writes in an output file.
@@ -68,11 +65,9 @@ object FileAccess {
         val writer = createWriter(fileName)
         array.forEach {
             writer.println(it)
-            println(it)
         }
         writer.close()
     }
-
 
     /**
      * Function that reads all the lines of a given file.
@@ -89,7 +84,6 @@ object FileAccess {
         return lines
     }
 
-
     /**
      * Function that creates a [BufferedReader] to read a file.
      * @param fileName Name of the file to read.
@@ -99,7 +93,6 @@ object FileAccess {
         return BufferedReader(FileReader(fileName))
     }
 
-
     /**
      * Function that creates a [PrintWriter] to write a file.
      * @param fileName Name to create a file.
@@ -108,5 +101,17 @@ object FileAccess {
     private fun createWriter(fileName: String): PrintWriter {
         return PrintWriter(fileName)
     }
+}
 
+/**
+ * Main function for testing the class.
+ */
+fun main() {
+    val productFile = FileAccess.readProductFile()
+    productFile.forEach(::println)
+    FileAccess.writeProductFile(productFile)
+
+    val coinFile = FileAccess.readCoinFile()
+    coinFile.forEach(::println)
+    FileAccess.writeProductFile(coinFile)
 }

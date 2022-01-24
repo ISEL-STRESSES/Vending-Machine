@@ -1,3 +1,4 @@
+//Import needed for checking adding some delay.
 import isel.leic.utils.Time
 
 /**
@@ -7,28 +8,42 @@ import isel.leic.utils.Time
 object LCD {
 
     //Variable initialization
-    private const val LINES =2                         //Number of lines available for data printing in display.
-    const val COLUMNS = 16                              //Number of columns available for data printing in display.
-    private const val WRITE_MASK = 0x0F                 //Mask needed for sending data to the display.
-    private const val REGISTER_SELECT = true            //Resister Select value in boolean.
-    private const val REGISTER_SELECT_BIT = 0x10        //Bit of Register Select in the byte.
-    private const val ENABLE_SIGNAL_BIT = 0x20          //Bit of Enable in the byte.
-    private const val SERIAL_MODE = true                //Serial mode Selector, default value true.
-    private const val LINE_CELLS = 0x40                 //Max address of cells in a line.
-    private const val SET_CGRAM_ADDRESS = 0x80          //Sets CGRAM Address.
-    private var LCD_STATE = false                       //Current State of LCD(if it was already initialized).
+    private const val LINES = 2                         // Number of lines available for data printing in display.
+    private const val SECOND_LINE = 1                   // Second Line in the LCD.
+    const val COLUMNS = 16                              // Number of columns available for data printing in display.
+
+    //Masks and Addresses
+    private const val WRITE_MASK = 0x0F                 // Mask needed for sending data to the display.
+    private const val REGISTER_SELECT = true            // Resister Select value as boolean.
+    private const val REGISTER_SELECT_BIT = 0x10        // Bit of Register Select in the byte.
+    private const val ENABLE_SIGNAL_BIT = 0x20          // Bit of Enable in the byte.
+    private const val SERIAL_MODE = true                // Serial mode Selector, default value true.
+    private const val LINE_CELLS = 0x40                 // Max address of cells in a line.
+    private const val SET_CGRAM_ADDRESS = 0x80          // Sets CGRAM Address.
+    private const val SET_DDRAM_ADDRESS = 0x40          // Sets DDRAM Address.
+    private const val AESTHETICS_TIME_INTERVAL = 125L   // Time that takes to write a char whit aesthetics.
+    private const val ONE_POSITION = 1                  // Amount to shift data in message.
+    private const val FOUR_POSITIONS = 4                // Amount to shift data in message(Full nibble).
+    private const val INSTRUCTION_REGISTER = 1          // Address on Instruction Register in a command.
+    private const val DATA_REGISTER = 0                 // Address on Data Register in a command.
+    private var LCD_STATE = false                       // Current State of LCD(if it was already initialized).
+
+    //Adding a new Char to the LCD
+    private const val CHAR_LINES = 8                    // Number of lines for setting a new char in the DDRAM.
+    private const val CHAR_HIGH_BITS_OFFSET = 3         // Offset for addressing the correct position in the CGRAM.
+    private const val RETURN_HOME_CMD = 0x02            // Command that places the cursor in the initial position.
 
     //Initialization sequence for LCD.
-    private const val DATA_INIT = 0x3                  //First 3 messages of data to send.
-    private const val FIRST_WAIT_TIME = 16L            //First wait time.
-    private const val SECOND_WAIT_TIME = 5L            //Second wait time.
-    private const val LAST_WAIT_TIME = 10L             //Last wait time (we needed to be more than 5.48ms).
-    private const val DISPLAY_ON = 0x0F                //Display on.
-    private const val DISPLAY_OFF = 0x08               //Display off.
-    private const val ENTRY_MODE_SET = 0x06            //Entry mode set.
-    private const val DISPLAY_CLEAR = 0x01             //Clears the display.
-    private const val LINES_AND_FONT = 0x28            //Specify the number of display lines and character font.
-    private const val SET_FOUR_BIT_INTERFACE = 0x2     //Sets the interface to 4 bit length.
+    private const val DATA_INIT = 0x3                  // First 3 messages of data to send.
+    private const val FIRST_WAIT_TIME = 16L            // First wait time.
+    private const val SECOND_WAIT_TIME = 5L            // Second wait time.
+    private const val LAST_WAIT_TIME = 10L             // Last wait time (we needed to be more than 5.48ms).
+    private const val DISPLAY_ON = 0x0F                // Display on.
+    private const val DISPLAY_OFF = 0x08               // Display off.
+    private const val ENTRY_MODE_SET = 0x06            // Entry mode set.
+    private const val DISPLAY_CLEAR = 0x01             // Clears the display.
+    private const val LINES_AND_FONT = 0x28            // Specify the number of display lines and character font.
+    private const val SET_FOUR_BIT_INTERFACE = 0x2     // Sets the interface to 4 bit length.
 
     /**
      * Function that implements a Serial communication protocol.
@@ -37,10 +52,10 @@ object LCD {
      * @param data Data to be sent to LCD (the lowest level function in the class).
      */
     private fun writeNibbleSerial(rs: Boolean, data: Int) {
-        val realData = (data shl 1)
-        //adding RS bit to data.
-        if (rs) SerialEmitter.send(SerialEmitter.Destination.LCD, realData or 1)
-        else SerialEmitter.send(SerialEmitter.Destination.LCD, realData or 0)
+        val realData = (data shl ONE_POSITION)
+        // Adding RS bit to data.
+        if (rs) SerialEmitter.send(SerialEmitter.Destination.LCD, realData or INSTRUCTION_REGISTER)
+        else SerialEmitter.send(SerialEmitter.Destination.LCD, realData or DATA_REGISTER)
 
     }
 
@@ -76,15 +91,15 @@ object LCD {
      * @param data Data to be sent to LCD.
      */
     private fun writeByte(rs: Boolean, data: Int) {
-        writeNibble(rs, data shr 4) //write high
-        writeNibble(rs, data)            //write low
+        writeNibble(rs, data shr FOUR_POSITIONS)    // Write high
+        writeNibble(rs, data)                       // Write low
     }
 
     /**
      * Function that writes a command in the LCD.
      * @param data Data to be written in IR.
      */
-    fun writeCMD(data: Int) {
+    private fun writeCMD(data: Int) {
         writeByte(!REGISTER_SELECT, data)
     }
 
@@ -92,7 +107,7 @@ object LCD {
      * Function that writes a data in the LCD.
      * @param data Data to be written in DR.
      */
-    fun writeDATA(data: Int) {
+    private fun writeDATA(data: Int) {
         writeByte(REGISTER_SELECT, data)
     }
 
@@ -100,32 +115,32 @@ object LCD {
      * Function that initializes the LCD for communication at 4 bit rate.
      */
     fun init() {
-        //check if LCD interface was already initialized.
+        // Check if LCD interface was already initialized.
         if (LCD_STATE) return
         HAL.init()
         SerialEmitter.init()
 
-        //8 bit data interface ------------
-        //First message.
+        // 8 bit data interface ------------
+        // First message.
         Time.sleep(FIRST_WAIT_TIME)
         writeNibble(!REGISTER_SELECT, DATA_INIT)
-        //Second message.
+        // Second message.
         Time.sleep(SECOND_WAIT_TIME)
         writeNibble(!REGISTER_SELECT, DATA_INIT)
-        //Third message.
+        // Third message.
         writeNibble(!REGISTER_SELECT, DATA_INIT)
-        //From this moment BF (busy flag) can be read.
+        // From this moment BF (busy flag) can be read.
 
         writeNibble(!REGISTER_SELECT, SET_FOUR_BIT_INTERFACE)
-        //From this moment the Interface is set to four bits.
+        // From this moment the Interface is set to four bits.
 
-        //4 bit data interface ------------
+        // 4 bit data interface ------------
         writeCMD(LINES_AND_FONT)
         writeCMD(DISPLAY_OFF)
         writeCMD(DISPLAY_CLEAR)
         writeCMD(ENTRY_MODE_SET)
         writeCMD(DISPLAY_ON)
-        //1.52ms (return home) + 37 microseconds * 80 (total cells) // worst case (for the others instructions +1ms)~5.48
+        // 1.52ms (return home) + 37 microseconds * 80 (total cells), worst case (for the others instructions +1ms)~5.48
         Time.sleep(LAST_WAIT_TIME)
         LCD_STATE = true
 
@@ -146,13 +161,14 @@ object LCD {
     fun write(text: String, aesthetics: Boolean = false) {
         for (i in text) {
             //writes letter by letter with time gap for aesthetics.
-            if (aesthetics) Time.sleep(125)
+            if (aesthetics) Time.sleep(AESTHETICS_TIME_INTERVAL)
             write(i)
         }
     }
 
     /**
-     * Function that sends a command for positioning the cursor to [line] and [column] coordinates.
+     * Function that sends a command for positioning the cursor to [line] and [column]
+     * coordinates.
      *
      * [line]: 0 until [LINES];
      *
@@ -163,52 +179,53 @@ object LCD {
      */
     fun cursor(line: Int, column: Int) {
         var cursor = column
-        if (line == 1)
+        if (line == SECOND_LINE)
             cursor += LINE_CELLS
-        //Command to place the cursor in the right place.
-        //writeCMD(SET_CGRAM_ADDRESS or cursor)
-        setGRAMAddress(cursor)
+        // Command to place the cursor in the right place.
+        // writeCMD(SET_CGRAM_ADDRESS or cursor)
+        setCGRAMAddress(cursor)
     }
 
     /**
-     * Function that sends a command for cleaning the cursor (places implicitly the cursor in position(0, 0)).
+     * Function that sends a command for cleaning the cursor
+     * (places implicitly the cursor in position(0, 0)).
      */
     fun clear() {
         writeCMD(DISPLAY_CLEAR)
     }
 
-    //Extra----------------
-
     /**
-     * Function that sends a command to set the DDRAM address for the [address] that is passed as a param.
+     * Function that sends a command to set the DDRAM address for the
+     * [address] that is passed as a param.
      * @param address Address to set the DDRAM.
      */
     private fun setDDRAMAddress(address: Int) {
-        writeCMD((1 shl 6) or address)
+        writeCMD(SET_DDRAM_ADDRESS or address)
     }
 
     /**
-     * Function that sends a command to set the CGRAM address for the [address] that is passed as a param.
+     * Function that sends a command to set the CGRAM address for the
+     * [address] that is passed as a param.
      * @param address Address to set the CGRAM.
      */
-    private fun setGRAMAddress(address: Int) {
+    private fun setCGRAMAddress(address: Int) {
         writeCMD(SET_CGRAM_ADDRESS or address)
     }
 
-
     /**
-     *
+     * Function that allows to add custom characters to the LCD CGRAM.
+     * @param position position in the CGRAM to add the new Character.
+     * @param char IntArray that represents the bitmap of the character to add to the CGRAM.
      */
     fun loadChar(position: Int, char: IntArray) {
-        repeat(8) { // Linha a linha
-            // Shift da posição para os 3 high bits, somar com linha atual
-            setDDRAMAddress(position.shl(3) + it)
-            // Aceder aos bits da linha atual do caracter
+        repeat(CHAR_LINES) { // line by line
+            // Shifts the current position to the 3 high bits and adds it with che current line.
+            setDDRAMAddress(position.shl(CHAR_HIGH_BITS_OFFSET) or it)
+            // Access to the bits of the current line of the Char.
             writeDATA(char[it])
         }
-        writeCMD(0x02)//RETURN HOME COMMAND // Colocar o cursor na posição inicial (0, 0), forçando um comando de setDDRAM
+        writeCMD(RETURN_HOME_CMD) // Places the cursor in the initial position, forcing an setDDRAM command.
     }
-
 
 }
 
@@ -216,14 +233,25 @@ object LCD {
  * Main function for testing the class.
  */
 fun main() {
-
     HAL.init()
     SerialEmitter.init()
     LCD.init()
-    LCD.cursor(1, 2)
-    LCD.write("Hello Word!!", true)
-    Time.sleep(2000)
+    val firstLine = 0
+    val line = 1
+    val column = 2
+    val lastVisibleColumn = 15
+    val waitTime = 2000L
+    val newChar = intArrayOf(0b01000, 0b01000, 0b01000, 0b11101, 0b11101, 0b11110, 0b11100, 0b00000)
+    val newCharPosition = 0
+    val newCharCode = 0.toChar()
+    LCD.loadChar(newCharPosition, newChar)
+    LCD.write("$newCharCode")
+    LCD.cursor(firstLine, lastVisibleColumn)
+    LCD.write("$newCharCode")
+    LCD.cursor(line, column)
+    LCD.write("Hello World!", true)
+    Time.sleep(waitTime)
     LCD.clear()
-    //Writes part of the phrase as intended (in both lines).
-    LCD.write("Let's go people,lets us see the character limits in this Liquid Cristal Display.", true)
+    // Writes part of the phrase as intended (in both lines).
+    LCD.write("Let's go people, lets us see the character limits in this Liquid Cristal Display.", true)
 }

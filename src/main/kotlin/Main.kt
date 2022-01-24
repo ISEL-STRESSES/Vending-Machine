@@ -1,5 +1,12 @@
+
+/**
+ * todo
+ */
 enum class Mode { ARROWS, INDEX }
 
+/**
+ * todo
+ */
 enum class Operation { MAINTENANCE, VENDING, REQUESTS }
 
 /**

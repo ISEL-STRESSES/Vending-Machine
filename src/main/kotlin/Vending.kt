@@ -1,4 +1,6 @@
-import Time.secsToTime
+//Imports needed for Time.
+import AppTime.secsToTime
+import isel.leic.utils.Time
 
 /**
  * Class that implements the Vending Routine.
@@ -6,10 +8,13 @@ import Time.secsToTime
  */
 object Vending {
     //Variable initialization.
-    private const val TIME_OUT =5000L          //Time to wait for a key.
-    private const val SELL_TIME_OUT = 1000L
-    var force = true                    //Flag that indicates if is needed to print again the initial menu.
-    private var VENDING_STATE = false           //Current State of Vending(if it was already initialized).
+    private const val TIME_OUT = 5000L          // Time to wait for a key.
+    private const val SELL_TIME_OUT = 1000L     // TODO: 23/01/2022
+    private const val TANKS_WAIT_TIME = 500L    // Tanks wait time.
+    private const val SECS_IN_A_MINUTE = 60000L // TODO: 24/01/2022
+    private const val CONFIRMATION_KEY = '#'    // TODO: 24/01/2022
+    var force = true                            // Flag that indicates if is needed to print again the initial menu.
+    private var VENDING_STATE = false           // Current State of Vending(if it was already initialized).
 
 
     /**
@@ -27,25 +32,13 @@ object Vending {
      * @param update Flag that forces the print of the menu.
      */
     fun printInitialMenu(update: Boolean = false) {
-        val currentTime = Time.getCurrentTime()
-        if ((currentTime/*Time.getCurrentTime()*/ - Time.LAST_TIME >= 60000L) || update) {
-
-            Time.LAST_TIME = currentTime
-            TUI.printText("Vending Machine ",TUI.Position.LEFT, 0)
-            printTime(Time.LAST_TIME)
+        val currentTime = AppTime.getCurrentTime()
+        if ((currentTime - AppTime.LAST_TIME >= SECS_IN_A_MINUTE) || update) {
+            AppTime.LAST_TIME = currentTime
+            TUI.printVendingMenu(AppTime.LAST_TIME.secsToTime())
         }
 
     }
-
-
-    /**
-     * Function that prints the Time and Date on the LCD.
-     * @param currentTime Time since 1st january 1970 in milliseconds.
-     */
-    private fun printTime(currentTime: Long) {
-        TUI.printText(currentTime.secsToTime(), TUI.Position.LEFT,1)
-    }
-
 
     /**
      * Function that has the routine of the Vending Mode.
@@ -57,7 +50,7 @@ object Vending {
 
         var pickedProduct: Products.Product? = null
 
-        if (TUI.getKBDKey(TIME_OUT) == '#')
+        if (TUI.getKBDKey(TIME_OUT) == CONFIRMATION_KEY)
             pickedProduct = App.pickProduct(mode, Products.products)
 
         if (pickedProduct != null) {
@@ -78,7 +71,7 @@ object Vending {
         TUI.printSell(selectedProduct, selectedProduct.price)
         var coinsInserted = 0
         while (coinsInserted < selectedProduct.price) {
-            if (TUI.getKBDKey(SELL_TIME_OUT) == '#') {
+            if (TUI.getKBDKey(SELL_TIME_OUT) == CONFIRMATION_KEY) {
                 TUI.printCancel(coinsInserted)
                 CoinAcceptor.ejectCoins()
                 break
@@ -90,7 +83,7 @@ object Vending {
                 TUI.printSell(selectedProduct, selectedProduct.price - coinsInserted)
             }
             if (coinsInserted == selectedProduct.price) {
-                TUI.printText("Collect Product", TUI.Position.CENTER, 1)
+                TUI.printCollect(selectedProduct)
                 CoinAcceptor.collectCoins()
                 Dispenser.dispense(selectedProduct.id)
                 Products.products[selectedProduct.id]!!.quantity--
@@ -98,9 +91,10 @@ object Vending {
                 break
             }
             TUI.printTanks()
+            Time.sleep(TANKS_WAIT_TIME)
         }
 
-        val depositRequest = CoinDeposit.emptyDepositRequest()
+        val depositRequest = CoinDeposit.depositRequest()
         if (depositRequest != null) {
             TUI.printOutOfService(depositRequest)
             return depositRequest

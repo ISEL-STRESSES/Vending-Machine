@@ -2,19 +2,20 @@
 import isel.leic.utils.Time
 
 /**
- * Receives a key pressed in the Hardware.
+ * Interface that interprets a key pressed in the Hardware (Matrix Keyboard).
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
  */
 object KBD {
 
     //Variable initialization
-    private const val READ_MASK = 0x0F  //Mask to read a key.
-    private const val DVAL_MASK =0x10  //Mask to check if a key is valid.
-    private const val ACK = 0x80        //Acknowledge to send if a key is received.
-    const val NONE = 0.toChar()         //Value that represents a non-existent key.
-    private var KBD_STATE = false       //Current State of KBD(if it was already initialized).
+    private const val READ_MASK = 0x0F  // Mask to read a key.
+    private const val DVAL_MASK = 0x10  // Mask to check if a key is valid.
+    private const val ACK = 0x80        // Acknowledge to send if a key is received.
+    private val KEY_INTERVAL = (0..11)  // Index interval of a valid key in [keys].
+    const val NONE = 0.toChar()         // Value that represents a non-existent key.
+    private var KBD_STATE = false       // Current State of KBD(if it was already initialized).
 
-    //keys that we can expect to read from the matrix keyboard (iterated by columns).
+    // keys that we can expect to read from the matrix keyboard (iterated by columns).
     val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#')
 
     /**
@@ -28,27 +29,25 @@ object KBD {
     }
 
     /**
-     * Function that translates the code of a pressed key to char if it is been immediately.
+     * Function that translates the code of a pressed key to char if pressed immediately.
      * pressed or [NONE] if it isn't.
      * @return The translated key or [NONE] if it isn't pressed.
      */
     private fun getKey(): Char {
+        //checks for the validation flag form the Hardware.
+        if (!HAL.isBit(DVAL_MASK))
+            return NONE
 
-        return if (HAL.isBit(DVAL_MASK)) {
+        val keyToCheck = HAL.readBits(READ_MASK)
+        HAL.setBits(ACK)
 
-            val keyToCheck = HAL.readBits(READ_MASK)
-            HAL.setBits(ACK)
+        while (HAL.isBit(DVAL_MASK));
+        HAL.clrBits(ACK)
 
-            while (HAL.isBit(DVAL_MASK));
-            HAL.clrBits(ACK)
+        if (keyToCheck !in KEY_INTERVAL)
+            return NONE
 
-            if (keyToCheck !in (0..12))
-                return NONE
-
-            keys[keyToCheck]
-
-        } else NONE
-
+        return keys[keyToCheck]
     }
 
     /**
@@ -57,11 +56,11 @@ object KBD {
      * @return The key or [NONE] if during [timeout] any was pressed.
      */
     fun waitKey(timeout: Long): Char {
-        //time reference
-        val timeSince1970 = Time.getTimeInMillis()   //time since January 1st 1970 in milliseconds
+        //time reference, time since January 1st 1970 in milliseconds
+        val timeSince1970 = Time.getTimeInMillis()
+
         //time that we can wait for receiving a valid key
         val waitTime = timeout + timeSince1970
-
         while (waitTime > Time.getTimeInMillis()) {
             val key = getKey()
             if (key != NONE)
@@ -73,18 +72,17 @@ object KBD {
 
 }
 
-
 /**
  * Main function for testing the class.
  */
 fun main() {
-    HAL.init()
     KBD.init()
 
+    val timeout = 1000L
     //We press 2 two random keys (2, 4)
     while (true) {
-        println(KBD.waitKey(1000))
-
-        println(KBD.waitKey(1000))
+        println(KBD.waitKey(timeout))    // 2 				// TESTED
+        println(KBD.waitKey(timeout))    // 4 				// TESTED
+        println(KBD.waitKey(timeout))   // NONE             // TESTED
     }
 }

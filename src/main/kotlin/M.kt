@@ -3,10 +3,9 @@
  * @author Carlos Pereira, Pedro Oliveira, Filipa Machado.
  */
 object M {
-    //Variable initialization.
-    private const val M_MASK =0x80     //Mask to read the Maintenance signal.
-    private var M_STATE = false         //Current State of M(if it was already initialized).
-
+    // Variable initialization.
+    private const val M_MASK = 0x80     // Mask to read the Maintenance signal.
+    private var M_STATE = false         // Current State of M(if it was already initialized).
 
     /**
      * Function that initializes the class M.
@@ -18,7 +17,6 @@ object M {
         M_STATE = true
     }
 
-
     /**
      * Function that checks if the M signal is active.
      * @return Returns True if the signal is active or false is inactive.
@@ -29,14 +27,13 @@ object M {
 
 }
 
-
 /**
  * Main function for testing.
  */
 fun main() {
     HAL.init()
     val mask = 0x80
-    val signal = HAL.readBits(mask)
-    HAL.writeBits(mask, signal)
+    val signal = HAL.isBit(mask)
+    if (signal) HAL.setBits(mask)
     println("$signal")
 }

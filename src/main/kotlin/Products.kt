@@ -1,3 +1,6 @@
+//Imports needed for testing the class.
+import Products.changeQuantity
+
 /**
  * Interface that implements the Products.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
@@ -43,19 +46,22 @@ object Products {
     private fun vendingProducts(): Array<Product?> {
         val file = FileAccess.readProductFile()
         var idx = 0
+        val filesize = file.lastIndex
         val products = Array(MACHINE_MAX_SIZE) {
-            val product = file[idx++].split(DELIMITER)
-            if (it == product[ID_INDEX].toInt())
-                Product(
-                    id = product[ID_INDEX].toInt(),
-                    name = product[NAME_INDEX],
-                    quantity = product[QUANTITY_INDEX].toInt(),
-                    price = product[PRICE_INDEX].toInt()
-                )
-            else {
-                idx--
-                null
-            }
+            if (idx < filesize) {
+                val product = file[idx++].split(DELIMITER)
+                if (it == product[ID_INDEX].toInt())
+                    Product(
+                        id = product[ID_INDEX].toInt(),
+                        name = product[NAME_INDEX],
+                        quantity = product[QUANTITY_INDEX].toInt(),
+                        price = product[PRICE_INDEX].toInt()
+                    )
+                else {
+                    idx--
+                    null
+                }
+            } else null
         }
         return products
     }
@@ -67,9 +73,9 @@ object Products {
      */
     fun saveProducts(array: Array<Product?>) {
         val aux = array.filterNotNull()
-        val newArray = Array(aux.size){
+        val newArray = Array(aux.size) {
             val element = aux[it]
-            "${element.id};${element.name};${element.quantity};${element.price}"
+            "${element.id}$DELIMITER${element.name}$DELIMITER${element.quantity}$DELIMITER${element.price}"
         }
         FileAccess.writeProductFile(newArray)
     }
@@ -87,9 +93,20 @@ object Products {
 
 }
 
-fun main () {
+/**
+ * Main function for testing the class.
+ */
+fun main() {
     Products.init()
     Products.products.forEach(::println)
+    println(Products.products.size)
     println()
-    Products.saveProducts(Products.products)
+    val newQuantity = 10
+    val exception = "No products Available"
+    val product = Products.products.first { it != null } ?: throw NullPointerException(exception)
+    val productIdx = product.id
+    println("Old quantity -> ${product.quantity}")
+    Products.products[productIdx] = product.changeQuantity(newQuantity)
+    println("New quantity -> ${Products.products[productIdx]?.quantity}")
+    Products.saveProducts(Products.products).also { println(it) }
 }
