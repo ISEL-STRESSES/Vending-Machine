@@ -17,6 +17,8 @@ object Maintenance {
     private const val REMOVE_PRODUCT = '3'          // Remove product selector key.
     private const val SHUTDOWN = '4'                // Shutdown selector key.
     private const val MAINTENANCE_MONEY = '*'       // Money for testing the dispense mode.
+    private var FIRST = true                        // Variable for checking the first print of Maintenance menu.
+    private var UPDATE = false                      // Variable to forcibly print the Maintenance menu.
     private var MAINTENANCE_STATE = false           //Current State of Maintenance(if it was already initialized).
 
     //Array of available Options.
@@ -45,22 +47,24 @@ object Maintenance {
             CoinDeposit.saveCoins(coins)
             Products.saveProducts(array)
             exitProcess(NORMAL_EXIT_CODE)
-        } else return
+        }
+        UPDATE = true
     }
 
     /**
      * Function that prints maintenance menu.
      */
-    private fun printMaintenance() {
-        TUI.printMaintenanceMenu(OPTIONS)
+    private fun printMaintenance(update: Boolean, first: Boolean) {
+        TUI.printMaintenanceMenu(OPTIONS, update, first)
+        FIRST = false
     }
 
     /**
      * Function that has the routine of the Maintenance Mode.
      * @param mode Mode needed for the [dispenseTest].
      */
-    fun runMaintenance(mode: App.Mode) {
-        printMaintenance()
+    fun run(mode: App.Mode) {
+        printMaintenance(UPDATE, FIRST)
         when (TUI.getKBDKey(WAIT_TIME)) {
             DISPENSE_TEST -> dispenseTest(mode)
             UPDATE_PRODUCT -> updateProduct(mode)
@@ -82,7 +86,7 @@ object Maintenance {
             // TODO: 25/01/2022
             Products.products[product.id] = product.changeQuantity(key)
         }
-
+        UPDATE = true
     }
 
     /**
@@ -92,6 +96,7 @@ object Maintenance {
     private fun removeProduct(mode: App.Mode) {
         val product = App.pickProduct(mode, Products.products) ?: return
         Products.products[product.id] = null
+        UPDATE = true
     }
 
     /**
@@ -99,7 +104,11 @@ object Maintenance {
      * @param mode Current mode of selection [App.Mode.INDEX] or [App.Mode.ARROWS].
      */
     private fun dispenseTest(mode: App.Mode) {
-        val product = App.pickProduct(mode, Products.products) ?: return
+        val product = App.pickProduct(mode, Products.products)
+        if (product == null ) {
+            UPDATE = true
+            return
+        }
         TUI.printMaintenanceSell(product)
         while (true) {
             if (TUI.getKBDKey(WAIT_TIME) == MAINTENANCE_MONEY)
@@ -107,16 +116,18 @@ object Maintenance {
         }
         TUI.printCollect(product)
         Dispenser.dispense(product.id)
+        UPDATE = true
     }
 
 }
 
 /**
- * Main function for testing the class.todo
+ * Main function for testing the class.
  */
 fun main() {
+    Maintenance.init()
     val mode = App.Mode.INDEX
     while (true)
-        Maintenance.runMaintenance(mode)
-    // TODO: 26/01/2022 STILL NOT TESTED
+        Maintenance.run(mode)
+    // TODO: 26/01/2022 HAS AN UNDOCUMENTED FIXTURE
 }

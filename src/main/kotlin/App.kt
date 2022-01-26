@@ -18,7 +18,6 @@ object App {
     private var force = Vending.force           // Flag for printing the initial menu again.
     private var APP_STATE = false               // Current State of App(if it was already initialized).
 
-
     /**
      * Enumerate that has all the selection modes implemented for selecting a product.
      *
@@ -46,23 +45,28 @@ object App {
         APP_STATE = true
     }
 
+    /**
+     * Function that runs the Vending Machine app.
+     */
     fun runApp(){
         //initializes all the app lower blocks
         appLowerBlocksInit()
-        var mode = Operation.VENDING
+        var mode: Operation
         val mode2 = Mode.INDEX
 
         while (true) {
-            if (M.setMaintenance()) {
-                mode = Operation.MAINTENANCE
-                Maintenance.runMaintenance(mode2)
-            } else {
-                val request = Vending.run(mode2)
-                if (request != null) {
-                    mode = Operation.REQUESTS
-
-                    //TODO("NOT YET IMPLEMENTED")
+            mode = if (M.setMaintenance())
+                Operation.MAINTENANCE
+            else Operation.VENDING
+            var request :String? = null
+            when(mode) {
+                Operation.VENDING -> {
+                    request = Vending.run(mode2)
+                    if (request != null )
+                        mode = Operation.REQUESTS
                 }
+                Operation.MAINTENANCE -> Maintenance.run(mode2)
+                Operation.REQUESTS -> Requests.run(request) //TODO("NOT YET IMPLEMENTED")
             }
 
         }
@@ -204,8 +208,8 @@ object App {
 }
 
 /**
- * Main function for testing the class.
+ * Runs the Vending machine and its modes.
  */
 fun main() {
-
+    App.runApp()
 }

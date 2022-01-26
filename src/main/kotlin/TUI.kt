@@ -1,5 +1,3 @@
-import isel.leic.utils.Time
-
 /**
  * Interface that implements communication between the LCD and the KBD.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
@@ -11,6 +9,8 @@ object TUI {
     private const val INITIAL_POSITION = 0      // Initial cell position on any line.
     private const val FIRST_LINE = 0            // First Line in the LCD.
     private const val SECOND_LINE = 1           // Second Line in the LCD.
+    private const val OPTIONS_LINE = SECOND_LINE// Line to print the options.
+    private const val FIRST_COLUMN = 0
     private const val DEFAULT_NUMBER_SIZE = 2   // Default number size to write in the LCD.
     const val NONE = KBD.NONE                   // Value that represents a non-existent key.
     private var OPTIONS_INDEX = 0               // Current Index in the options Array.
@@ -76,7 +76,6 @@ object TUI {
         )
         printText(QUANTITY_INDICATOR + product.quantity.toFilledString(), Position.CENTER, SECOND_LINE)
         printText(BITCOIN_CHAR_CODE.toChar() + product.price.toFilledString(), Position.RIGHT, SECOND_LINE)
-
     }
 
     /**
@@ -96,7 +95,6 @@ object TUI {
         clearLCD()
         printText("Product ${product?.id ?: index}", Position.CENTER, FIRST_LINE)
         printText("not available", Position.CENTER, SECOND_LINE)
-        println(product)
     }
 
     /**
@@ -104,7 +102,7 @@ object TUI {
      * @param product Product to print the name.
      */
     fun printProductName(product: Products.Product) {
-        printText(product.name, Position.LEFT, FIRST_LINE)
+        printText(product.name, Position.CENTER, FIRST_LINE)
     }
 
     /**
@@ -121,10 +119,11 @@ object TUI {
      * Function that prints the quantity update.
      * @param product Product to change its quantity.
      */
-    fun printUpdateQuantity(product: Products.Product) {
+    fun printUpdateQuantity(product: Products.Product,blink: Boolean = true) {
         clearLCD()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText("Qty:??", Position.LEFT, SECOND_LINE)
+        LCD.setCursorOn(true)
         LCD.cursor(SECOND_LINE, INIT_QUANTITY_POSITION)
     }
 
@@ -154,7 +153,7 @@ object TUI {
      */
     fun printVendingMenu(currentTime: String) {
         clearLCD()
-        printText("Vending Machine ", Position.LEFT, FIRST_LINE)
+        printText("Vending Machine", Position.LEFT, FIRST_LINE)
         printText(currentTime, Position.LEFT, SECOND_LINE)
     }
 
@@ -163,10 +162,16 @@ object TUI {
      * Function that prints the Vending Machine mode in Maintenance mode.
      * @param options Array of available options.
      */
-    fun printMaintenanceMenu(options: Array<String>) {
-        clearLCD()
-        printText("Maintenance Mode", Position.RIGHT, FIRST_LINE)
-        toggleThroughOptions(options)
+    fun printMaintenanceMenu(options: Array<String>, update:Boolean, first: Boolean) {
+        if (update || first) {
+            clearLCD()
+            printText("Maintenance Mode", Position.RIGHT, FIRST_LINE)
+            toggleThroughOptions(options)
+
+        } else {
+            clearLine(OPTIONS_LINE)
+            toggleThroughOptions(options)
+        }
     }
 
     /**
@@ -175,7 +180,7 @@ object TUI {
      */
     private fun toggleThroughOptions(options: Array<String>) {
         printText(options[OPTIONS_INDEX++], Position.LEFT, SECOND_LINE)
-        Time.sleep(DEFAULT_TIME_OUT)
+        //Time.sleep(DEFAULT_TIME_OUT)
         if (OPTIONS_INDEX == options.size)
             OPTIONS_INDEX = options.indices.first
     }
@@ -185,6 +190,7 @@ object TUI {
      * @param product Product to collect.
      */
     fun printCollect(product: Products.Product) {
+
         printText("Collect Product", Position.CENTER, SECOND_LINE)
         printProductName(product)
     }
@@ -255,10 +261,11 @@ object TUI {
      * @param line Line to be cleared.
      */
     private fun clearLine(line: Int) {
-        repeat(LINE_SIZE) {
-            LCD.cursor(line, it)
-            LCD.write(LCD_FILL_STRING)
-        }
+        var fill = EMPTY_STRING
+        for (i in FIRST_COLUMN until LINE_SIZE)
+            fill += LCD_FILL_STRING
+        LCD.cursor(line, FIRST_COLUMN)
+        LCD.write(fill)
     }
 
     /**
@@ -266,9 +273,6 @@ object TUI {
      */
     private fun clearLCD() {
         LCD.clear()
-        //Time.sleep(10L)
-//        clearLine(FIRST_LINE)
-//        clearLine(SECOND_LINE)
     }
 
     /**

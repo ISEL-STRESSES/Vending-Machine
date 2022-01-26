@@ -120,5 +120,4 @@ fun main() {
     println("Expected -> $value, real ->${HAL.writeBits(mask, value)}")                                 // DONE
     println("Expected -> FF, real ->${HAL.clrBits(mask)}")                                              // DONE
     println("Expected -> $value, real ->${HAL.setBits(value)}")                                         // DONE
-
 }

@@ -13,7 +13,6 @@ object Vending {
     var force = false                            // Flag that indicates if is needed to print again the initial menu.
     private var VENDING_STATE = false           // Current State of Vending(if it was already initialized).
 
-
     /**
      * Function that initializes the class of the Vending.
      * If it was already initialized exists the function.
@@ -34,7 +33,6 @@ object Vending {
             AppTime.LAST_TIME = currentTime
             TUI.printVendingMenu(AppTime.LAST_TIME.secsToTime())
         }
-
     }
 
     /**
@@ -57,7 +55,6 @@ object Vending {
         return null
     }
 
-
     /**
      * Function that has the sell product Protocol.
      * @param selectedProduct Selected product to sell.
@@ -78,6 +75,7 @@ object Vending {
                 coinsInserted++
                 TUI.printSell(selectedProduct, selectedProduct.price - coinsInserted)
             }
+
             if (coinsInserted == selectedProduct.price) {
                 TUI.printCollect(selectedProduct)
                 CoinAcceptor.collectCoins()
@@ -86,6 +84,7 @@ object Vending {
                 CoinDeposit.COINS += coinsInserted
                 break
             }
+
             TUI.printTanks()
             Time.sleep(TANKS_WAIT_TIME)
         }
@@ -97,7 +96,6 @@ object Vending {
         }
         return null
     }
-
 }
 
 
