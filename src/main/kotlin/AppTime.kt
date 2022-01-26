@@ -11,6 +11,7 @@ object AppTime {
     //Variable Initialization.
     private const val TIME_FORMAT = "dd-MM-yyyy HH:mm"      // Time format.
     private const val MINUTE_CORRECTION = 60000             // Correction needed for getting the current time by the minute.
+    const val SECS_IN_A_MINUTE = 60000L                     // Seconds in a minute.
     private const val HOUR_SIZE = 6                         // Length on the Time Format reserved for the hour.
     private const val DATE_SIZE = 11                        // Length on the Time Format reserved for the date.
     var LAST_TIME = 0L                                      // Last Time since january 1st 1970 in milliseconds.

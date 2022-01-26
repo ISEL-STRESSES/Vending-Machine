@@ -13,6 +13,7 @@ object Products {
     private const val NAME_INDEX = 1                                // Index of the name field in the file String.
     private const val QUANTITY_INDEX = 2                            // Index of the quantity field in the file String.
     private const val PRICE_INDEX = 3                               // Index of the price field in the file String.
+    const val MINIMUM_QUANTITY = 0
     private const val DELIMITER = ';'                               // Delimiter of the file String.
     private var PRODUCTS_STATE = false                              // Current State of Products(if it was already initialized).
 
@@ -46,9 +47,8 @@ object Products {
     private fun vendingProducts(): Array<Product?> {
         val file = FileAccess.readProductFile()
         var idx = 0
-        val filesize = file.lastIndex
         val products = Array(MACHINE_MAX_SIZE) {
-            if (idx < filesize) {
+            if (idx < file.size) {
                 val product = file[idx++].split(DELIMITER)
                 if (it == product[ID_INDEX].toInt())
                     Product(

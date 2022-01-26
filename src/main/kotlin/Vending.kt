@@ -9,11 +9,8 @@ import isel.leic.utils.Time
 object Vending {
     //Variable initialization.
     private const val TIME_OUT = 5000L          // Time to wait for a key.
-    private const val SELL_TIME_OUT = 1000L     // TODO: 23/01/2022
     private const val TANKS_WAIT_TIME = 500L    // Tanks wait time.
-    private const val SECS_IN_A_MINUTE = 60000L // TODO: 24/01/2022
-    private const val CONFIRMATION_KEY = '#'    // TODO: 24/01/2022
-    var force = true                            // Flag that indicates if is needed to print again the initial menu.
+    var force = false                            // Flag that indicates if is needed to print again the initial menu.
     private var VENDING_STATE = false           // Current State of Vending(if it was already initialized).
 
 
@@ -23,7 +20,7 @@ object Vending {
      */
     fun init() {
         if (VENDING_STATE) return
-        App.allBlocksInit()
+        App.appLowerBlocksInit()
         VENDING_STATE = true
     }
 
@@ -31,9 +28,9 @@ object Vending {
      * Function that print the initial menu of the Vending Machine.
      * @param update Flag that forces the print of the menu.
      */
-    fun printInitialMenu(update: Boolean = false) {
+    private fun printInitialMenu(update: Boolean = false) {
         val currentTime = AppTime.getCurrentTime()
-        if ((currentTime - AppTime.LAST_TIME >= SECS_IN_A_MINUTE) || update) {
+        if ((currentTime - AppTime.LAST_TIME >= AppTime.SECS_IN_A_MINUTE) || update) {
             AppTime.LAST_TIME = currentTime
             TUI.printVendingMenu(AppTime.LAST_TIME.secsToTime())
         }
@@ -45,17 +42,16 @@ object Vending {
      * @param mode Mode needed for the [App.pickProduct].
      * @return Returns requests if there is any
      */
-    fun run(mode: Mode): String? {
+    fun run(mode: App.Mode): String? {
         printInitialMenu(force)
 
         var pickedProduct: Products.Product? = null
 
-        if (TUI.getKBDKey(TIME_OUT) == CONFIRMATION_KEY)
+        if (TUI.getKBDKey(TIME_OUT) == TUI.CONFIRMATION_KEY)
             pickedProduct = App.pickProduct(mode, Products.products)
 
         if (pickedProduct != null) {
             return sellProduct(pickedProduct)
-
         }
 
         return null
@@ -65,13 +61,13 @@ object Vending {
     /**
      * Function that has the sell product Protocol.
      * @param selectedProduct Selected product to sell.
-     * @return Returns a [Operation.REQUESTS] if there is any.
+     * @return Returns a [App.Operation.REQUESTS] if there is any.
      */
     private fun sellProduct(selectedProduct: Products.Product): String? {
         TUI.printSell(selectedProduct, selectedProduct.price)
         var coinsInserted = 0
         while (coinsInserted < selectedProduct.price) {
-            if (TUI.getKBDKey(SELL_TIME_OUT) == CONFIRMATION_KEY) {
+            if (TUI.getKBDKey(App.TIME_OUT) == TUI.CONFIRMATION_KEY) {
                 TUI.printCancel(coinsInserted)
                 CoinAcceptor.ejectCoins()
                 break
@@ -109,8 +105,8 @@ object Vending {
  * Main function for testing the class.
  */
 fun main() {
-    App.allBlocksInit()
-    val mode = Mode.INDEX
+    App.appLowerBlocksInit()
+    val mode = App.Mode.INDEX
     while (true) {
         Vending.run(mode)
     }

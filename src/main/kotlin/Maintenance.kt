@@ -10,17 +10,17 @@ import kotlin.system.exitProcess
 object Maintenance {
     //Variable initialization.
     private const val WAIT_TIME = 5000L             //Default wait time for getting an KBD key.
-    private const val NORMAL_EXIT_CODE = 0          // TODO: 24/01/2022
-    private const val CONFIRMATION_SHUTDOWN = '5'   // TODO: 23/01/2022
-    private const val DISPENSE_TEST = '1'           // TODO: 23/01/2022
-    private const val UPDATE_PRODUCT = '2'          // TODO: 23/01/2022
-    private const val REMOVE_PRODUCT = '3'          // TODO: 23/01/2022
-    private const val SHUTDOWN = '4'                // TODO: 23/01/2022
-    private const val MAINTENANCE_MONEY = '*'       // TODO: 23/01/2022
+    private const val NORMAL_EXIT_CODE = 0          // Normal exit code when closing the application.
+    private const val CONFIRMATION_SHUTDOWN = '5'   // Confirmation key for closing the application.
+    private const val DISPENSE_TEST = '1'           // Dispense test selector key.
+    private const val UPDATE_PRODUCT = '2'          // Update product selector key.
+    private const val REMOVE_PRODUCT = '3'          // Remove product selector key.
+    private const val SHUTDOWN = '4'                // Shutdown selector key.
+    private const val MAINTENANCE_MONEY = '*'       // Money for testing the dispense mode.
     private var MAINTENANCE_STATE = false           //Current State of Maintenance(if it was already initialized).
 
     //Array of available Options.
-    val OPTIONS = arrayOf("1-Dispense Test", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
+    private val OPTIONS = arrayOf("1-Dispense Test", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
 
     /**
      * Function that initializes the class of the Maintenance.
@@ -28,7 +28,7 @@ object Maintenance {
      */
     fun init() {
         if (MAINTENANCE_STATE) return
-        App.allBlocksInit()
+        App.appLowerBlocksInit()
         MAINTENANCE_STATE = true
     }
 
@@ -59,7 +59,7 @@ object Maintenance {
      * Function that has the routine of the Maintenance Mode.
      * @param mode Mode needed for the [dispenseTest].
      */
-    fun runMaintenance(mode: Mode) {
+    fun runMaintenance(mode: App.Mode) {
         printMaintenance()
         when (TUI.getKBDKey(WAIT_TIME)) {
             DISPENSE_TEST -> dispenseTest(mode)
@@ -73,12 +73,13 @@ object Maintenance {
      * Function that changes the quantity of a product in the Vending Machine.
      * @param mode Mode to browse trough products.
      */
-    private fun updateProduct(mode: Mode) {
-        val product = App.pickProduct(mode, Products.products, Operation.MAINTENANCE) ?: return
+    private fun updateProduct(mode: App.Mode) {
+        val product = App.pickProduct(mode, Products.products, App.Operation.MAINTENANCE) ?: return
         var key: Int
         while (TUI.getInt(WAIT_TIME).also { key = it } != TUI.NONE.toInteger()) {
             TUI.printProductName(product)
             TUI.printUpdateQuantity(product)
+            // TODO: 25/01/2022
             Products.products[product.id] = product.changeQuantity(key)
         }
 
@@ -86,18 +87,18 @@ object Maintenance {
 
     /**
      * Function that removes a product form visualization.
-     * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
+     * @param mode Current mode of selection [App.Mode.INDEX] or [App.Mode.ARROWS].
      */
-    private fun removeProduct(mode: Mode) {
+    private fun removeProduct(mode: App.Mode) {
         val product = App.pickProduct(mode, Products.products) ?: return
         Products.products[product.id] = null
     }
 
     /**
      * Function that tests the dispensing of a product.
-     * @param mode Current mode of selection [Mode.INDEX] or [Mode.ARROWS].
+     * @param mode Current mode of selection [App.Mode.INDEX] or [App.Mode.ARROWS].
      */
-    private fun dispenseTest(mode: Mode) {
+    private fun dispenseTest(mode: App.Mode) {
         val product = App.pickProduct(mode, Products.products) ?: return
         TUI.printMaintenanceSell(product)
         while (true) {
@@ -114,5 +115,8 @@ object Maintenance {
  * Main function for testing the class.todo
  */
 fun main() {
-    Maintenance.OPTIONS.forEach { println(it.length) }
+    val mode = App.Mode.INDEX
+    while (true)
+        Maintenance.runMaintenance(mode)
+    // TODO: 26/01/2022 STILL NOT TESTED
 }

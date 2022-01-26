@@ -20,7 +20,6 @@ object FileAccess {
      */
     fun init() {
         if (FILE_ACCESS_STATE) return
-        //...
         FILE_ACCESS_STATE = true
     }
 

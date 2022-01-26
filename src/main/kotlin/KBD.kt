@@ -8,15 +8,16 @@ import isel.leic.utils.Time
 object KBD {
 
     //Variable initialization
-    private const val READ_MASK = 0x0F  // Mask to read a key.
-    private const val DVAL_MASK = 0x10  // Mask to check if a key is valid.
-    private const val ACK = 0x80        // Acknowledge to send if a key is received.
-    private val KEY_INTERVAL = (0..11)  // Index interval of a valid key in [keys].
-    const val NONE = 0.toChar()         // Value that represents a non-existent key.
-    private var KBD_STATE = false       // Current State of KBD(if it was already initialized).
+    private const val READ_MASK = 0x0F          // Mask to read a key.
+    private const val DVAL_MASK = 0x10          // Mask to check if a key is valid.
+    private const val ACK = 0x80                // Acknowledge to send if a key is received.
+    private val INVALID_KEY_RANGE = (1..0)      // Initial range for keys, must be overwritten.
+    private var KEY_INTERVAL = INVALID_KEY_RANGE// Index interval of a valid key in [keys].
+    const val NONE = 0.toChar()                 // Value that represents a non-existent key.
+    private var KBD_STATE = false               // Current State of KBD(if it was already initialized).
 
     // keys that we can expect to read from the matrix keyboard (iterated by columns).
-    val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#')
+    val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#', NONE, NONE, NONE, NONE)
 
     /**
      * Initializes the class and clears the ACK in case it is set to One.
@@ -25,7 +26,22 @@ object KBD {
         if (KBD_STATE) return
         HAL.init()
         HAL.clrBits(ACK)
+        KEY_INTERVAL = getValidInterval(keys)
         KBD_STATE = true
+    }
+
+    /**
+     * Function that finds the first invalid key form a Char Array.
+     * @param keys CharArray of keys from a Matrix Keyboard.
+     * @return Returns the range of valid keys.
+     */
+    private fun getValidInterval(keys: CharArray): IntRange {
+        var lastIndex = 0
+        for ( i in keys.indices) {
+            if (keys[i] == NONE)
+                lastIndex = i - 1
+        }
+        return (0..lastIndex)
     }
 
     /**
@@ -76,6 +92,7 @@ object KBD {
  * Main function for testing the class.
  */
 fun main() {
+    HAL.init()
     KBD.init()
 
     val timeout = 1000L

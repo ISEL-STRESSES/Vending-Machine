@@ -19,8 +19,8 @@ object TUI {
     private const val EMPTY_STRING = ""         // Auxiliary empty string.
     private const val ZERO_CHAR = '0'           // Char needed for getting the integer values of other chars.
     private const val QUANTITY_INDICATOR = '#'  // Quantity indicator.
-    private const val CONFIRMATION_CHAR = '#'   // Character that selects teh current product.
-    private const val MODE_CHAR = '*'           // Character that changes modes(Arrows or Index).
+    const val CONFIRMATION_KEY = '#'            // Character that selects teh current product.
+    const val MODE_KEY = '*'                    // Character that changes modes(Arrows or Index).
     private const val MULTIPLIER = 10           // Multiplier for getting 2 keys form Keyboard.
     private const val PARITY_CHECK = 2          // Checker of parity.
     private const val NO_COINS = 0              // No coins to return.
@@ -42,7 +42,7 @@ object TUI {
     private const val ARROW_CGRAM_POSITION = 1  // Arrow address in the CGRAM.
 
     /**
-     * Enumerate that Represents all the valid position on the Display for writing.
+     * Enumerate that Represents all the available positions in a line for writing in the LCD.
      */
     enum class Position { CENTER, LEFT, RIGHT }
 
@@ -66,11 +66,11 @@ object TUI {
      * available prints "Product not available".
      * @param product Product to print information about.
      */
-    fun printProduct(product: Products.Product, mode: Mode = Mode.INDEX) {
+    fun printProduct(product: Products.Product, mode: App.Mode = App.Mode.INDEX) {
         clearLCD()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText(
-            product.id.toFilledString() + if (mode == Mode.ARROWS) ARROW_CHAR_CODE.toChar() else EMPTY_STRING,
+            product.id.toFilledString() + if (mode == App.Mode.ARROWS) ARROW_CHAR_CODE.toChar() else EMPTY_STRING,
             Position.LEFT,
             SECOND_LINE
         )
@@ -100,15 +100,16 @@ object TUI {
     }
 
     /**
-     * todo
+     * Function that prints the name of a product.
+     * @param product Product to print the name.
      */
-    fun printProductName(product: Products.Product, line: Int = FIRST_LINE) {
-        printText(product.name, Position.LEFT, line)
+    fun printProductName(product: Products.Product) {
+        printText(product.name, Position.LEFT, FIRST_LINE)
     }
 
     /**
      * Function that prints the reason for the machine to be out of service.
-     * @param reason Reason of Out Of Service
+     * @param reason Reason of Out Of Service.
      */
     fun printOutOfService(reason: String) {
         clearLCD()
@@ -148,7 +149,8 @@ object TUI {
     }
 
     /**
-     * todo
+     * Function that prints the Vending Machine mode in Vending mode.
+     * @param currentTime Time to print in the menu.
      */
     fun printVendingMenu(currentTime: String) {
         clearLCD()
@@ -156,16 +158,10 @@ object TUI {
         printText(currentTime, Position.LEFT, SECOND_LINE)
     }
 
-//    /**
-//     * Function that prints the Time and Date on the LCD.
-//     * @param currentTime Time since 1st january 1970 in milliseconds.
-//     */
-//    private fun printTime(currentTime: Long) {
-//        TUI.printText(currentTime.secsToTime(), TUI.Position.LEFT,1)
-//    }
 
     /**
-     * todo
+     * Function that prints the Vending Machine mode in Maintenance mode.
+     * @param options Array of available options.
      */
     fun printMaintenanceMenu(options: Array<String>) {
         clearLCD()
@@ -175,7 +171,7 @@ object TUI {
 
     /**
      * Function that allows to toggle through Maintenance [options].
-     * todo
+     * @param options Array of available options.
      */
     private fun toggleThroughOptions(options: Array<String>) {
         printText(options[OPTIONS_INDEX++], Position.LEFT, SECOND_LINE)
@@ -185,7 +181,8 @@ object TUI {
     }
 
     /**
-     * todo
+     * Function that prints the collect message in the LCD.
+     * @param product Product to collect.
      */
     fun printCollect(product: Products.Product) {
         printText("Collect Product", Position.CENTER, SECOND_LINE)
@@ -268,8 +265,10 @@ object TUI {
      * Function that cleans the hole LCD.
      */
     private fun clearLCD() {
-        clearLine(FIRST_LINE)
-        clearLine(SECOND_LINE)
+        LCD.clear()
+        //Time.sleep(10L)
+//        clearLine(FIRST_LINE)
+//        clearLine(SECOND_LINE)
     }
 
     /**
@@ -281,11 +280,11 @@ object TUI {
         var value = 0
         val kbdInt = getKBDKey(timeout)
 
-        if (kbdInt in (KBD.keys.filter { it != CONFIRMATION_CHAR && it != MODE_CHAR }))
+        if (kbdInt in (KBD.keys.filter { it != CONFIRMATION_KEY && it != MODE_KEY }))
             value = kbdInt.toInteger()
 
         val newInt = KBD.waitKey(timeout)
-        if (newInt in (KBD.keys.filter { it != CONFIRMATION_CHAR && it != MODE_CHAR }))
+        if (newInt in (KBD.keys.filter { it != CONFIRMATION_KEY && it != MODE_KEY }))
             value = value * MULTIPLIER + newInt.toInteger()
         return value
     }
@@ -301,10 +300,10 @@ object TUI {
 
     /**
      * Function that gets any key pressed in the Keyboard.
-     * @param timeOut Timeout to wait for a Key, by default is [DEFAULT_TIME_OUT].
+     * @param timeOut Timeout to wait for a Key.
      * @return The char representation of the key.
      */
-    fun getKBDKey(timeOut: Long = DEFAULT_TIME_OUT): Char {
+    fun getKBDKey(timeOut: Long): Char {
         return KBD.waitKey(timeOut)
     }
 }
@@ -318,6 +317,5 @@ fun main() {
     LCD.init()
     KBD.init()
     TUI.init()
-//    TUI.printText("Example", TUI.Position.CENTER, 0)
-//    TUI.printText("Example2", TUI.Position.CENTER, 1)
+    // TODO: 26/01/2022 BRUTE FORCE TEST
 }

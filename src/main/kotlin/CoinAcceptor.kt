@@ -72,8 +72,6 @@ object CoinAcceptor {
     private fun clearSignals() {
         val signalsToClean = COIN_ACCEPT_MASK or COIN_COLLECT_MASK or COIN_EJECT_MASK
         HAL.clrBits(signalsToClean)
-        //preciso de limpar o porto de saida nos bits 5 a 7 por causa dos sinais accept collect eject?
-        //no init do HAL eles sao todos limpos! é suficiente? TODO
     }
 }
 

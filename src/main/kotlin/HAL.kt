@@ -11,7 +11,6 @@ object HAL {
     private var outputValue = 0x00      // Initial value of output
     private const val FULL_MASK = 0xFF  // Full mask to write in the USBPort.
     private const val MAX_SIZE = 1      // Max Size for checking if a bit is set.
-//    private const val ZERO = 0          // Zero value.
     private var HAL_STATE = false       // Current State of HAL(if it was already initialized).
 
     /**

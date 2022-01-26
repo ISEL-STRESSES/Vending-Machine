@@ -105,7 +105,6 @@ object SerialEmitter {
  */
 fun main() {
     HAL.init()
-    LCD.init()
     SerialEmitter.init()
 
     val data1 = 2

@@ -16,10 +16,10 @@ object CoinDeposit {
     private const val TIME_INDEX = 2                        // Index of the quantity field in the file String.
     private const val CURRENT_LOG = 1                       // Size adder for accounting for the new log of Coins.
     private const val MINIMUM_SIZE = 1                      // Minimum size that the File needs to have for storing previous logs.
-    private const val DEPOSIT_MAX_CAPACITY = 40             // Max capacity of the Coin Deposit.
+    private const val INCREMENT = 10                        // Increment for each sale
+    private var DEPOSIT_MAX_CAPACITY = INCREMENT // Max capacity of the Coin Deposit.
     private const val DEPOSIT_REQUEST = "CoinDeposit Full"  // Deposit Full Request.
-    private var COIN_DEPOSIT_STATE =
-        false                  // Current State of Coin Deposit(if it was already initialized).
+    private var COIN_DEPOSIT_STATE = false                  // Current State of Coin Deposit(if it was already initialized).
 
     /**
      * Class that represents a [Coin].
@@ -36,7 +36,9 @@ object CoinDeposit {
     fun init() {
         if (COIN_DEPOSIT_STATE) return
         FileAccess.init()
+        COINS_LOG = vendingCoins()
         COINS = vendingCoins().last().quantity
+        DEPOSIT_MAX_CAPACITY = COINS + INCREMENT
         COIN_DEPOSIT_STATE = true
 
     }
@@ -63,7 +65,7 @@ object CoinDeposit {
         val newArray = Array(array.size + CURRENT_LOG) { EMPTY_STRING }
         if (array.size > MINIMUM_SIZE)
             for (i in array.indices) {
-                val coin = "${array[i].quantity};${array[i].date}${array[i].time}"
+                val coin = "${array[i].quantity}$FILE_DELIMITER${array[i].date}$FILE_DELIMITER${array[i].time}"
                 newArray[i] = coin
             }
 
@@ -106,4 +108,3 @@ fun main() {
     println(request)
     CoinDeposit.saveCoins(CoinDeposit.COINS_LOG)
 }
-// TODO: 24/01/2022

@@ -32,8 +32,6 @@ object M {
  */
 fun main() {
     HAL.init()
-    val mask = 0x80
-    val signal = HAL.isBit(mask)
-    if (signal) HAL.setBits(mask)
+    val signal = M.setMaintenance()
     println("$signal")
 }

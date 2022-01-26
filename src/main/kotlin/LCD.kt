@@ -19,8 +19,8 @@ object LCD {
     private const val ENABLE_SIGNAL_BIT = 0x20          // Bit of Enable in the byte.
     private const val SERIAL_MODE = true                // Serial mode Selector, default value true.
     private const val LINE_CELLS = 0x40                 // Max address of cells in a line.
-    private const val SET_CGRAM_ADDRESS = 0x80          // Sets CGRAM Address.
-    private const val SET_DDRAM_ADDRESS = 0x40          // Sets DDRAM Address.
+    private const val SET_CGRAM_ADDRESS = 0x40          // Sets CGRAM Address.
+    private const val SET_DDRAM_ADDRESS = 0x80          // Sets DDRAM Address.
     private const val AESTHETICS_TIME_INTERVAL = 125L   // Time that takes to write a char whit aesthetics.
     private const val ONE_POSITION = 1                  // Amount to shift data in message.
     private const val FOUR_POSITIONS = 4                // Amount to shift data in message(Full nibble).
@@ -34,16 +34,16 @@ object LCD {
     private const val RETURN_HOME_CMD = 0x02            // Command that places the cursor in the initial position.
 
     //Initialization sequence for LCD.
-    private const val DATA_INIT = 0x3                  // First 3 messages of data to send.
-    private const val FIRST_WAIT_TIME = 16L            // First wait time.
-    private const val SECOND_WAIT_TIME = 5L            // Second wait time.
-    private const val LAST_WAIT_TIME = 10L             // Last wait time (we needed to be more than 5.48ms).
-    private const val DISPLAY_ON = 0x0F                // Display on.
-    private const val DISPLAY_OFF = 0x08               // Display off.
-    private const val ENTRY_MODE_SET = 0x06            // Entry mode set.
-    private const val DISPLAY_CLEAR = 0x01             // Clears the display.
-    private const val LINES_AND_FONT = 0x28            // Specify the number of display lines and character font.
-    private const val SET_FOUR_BIT_INTERFACE = 0x2     // Sets the interface to 4 bit length.
+    private const val DATA_INIT = 0x3                   // First 3 messages of data to send.
+    private const val FIRST_WAIT_TIME = 16L             // First wait time.
+    private const val SECOND_WAIT_TIME = 5L             // Second wait time.
+    private const val CLEAR_WAIT_TIME = 10L             // Last wait time (we needed to be more than 5.48ms).
+    private const val DISPLAY_ON = 0x0F                 // Display on.
+    private const val DISPLAY_OFF = 0x08                // Display off.
+    private const val ENTRY_MODE_SET = 0x06             // Entry mode set.
+    private const val DISPLAY_CLEAR = 0x01              // Clears the display.
+    private const val LINES_AND_FONT = 0x28             // Specify the number of display lines and character font.
+    private const val SET_FOUR_BIT_INTERFACE = 0x02     // Sets the interface to 4 bit length.
 
     /**
      * Function that implements a Serial communication protocol.
@@ -140,8 +140,8 @@ object LCD {
         writeCMD(DISPLAY_CLEAR)
         writeCMD(ENTRY_MODE_SET)
         writeCMD(DISPLAY_ON)
-        // 1.52ms (return home) + 37 microseconds * 80 (total cells), worst case (for the others instructions +1ms)~5.48
-        Time.sleep(LAST_WAIT_TIME)
+        // 1.52ms (return home) + 37 microseconds * 0x80 (total cells), worst case (for the others instructions +1ms)~5.48
+        Time.sleep(CLEAR_WAIT_TIME)
         LCD_STATE = true
 
     }
@@ -183,7 +183,8 @@ object LCD {
             cursor += LINE_CELLS
         // Command to place the cursor in the right place.
         // writeCMD(SET_CGRAM_ADDRESS or cursor)
-        setCGRAMAddress(cursor)
+        setDDRAMAddress(cursor)
+        Time.sleep(100L)
     }
 
     /**
@@ -192,6 +193,7 @@ object LCD {
      */
     fun clear() {
         writeCMD(DISPLAY_CLEAR)
+        Time.sleep(CLEAR_WAIT_TIME)
     }
 
     /**
@@ -220,7 +222,7 @@ object LCD {
     fun loadChar(position: Int, char: IntArray) {
         repeat(CHAR_LINES) { // line by line
             // Shifts the current position to the 3 high bits and adds it with che current line.
-            setDDRAMAddress(position.shl(CHAR_HIGH_BITS_OFFSET) or it)
+            setCGRAMAddress(position.shl(CHAR_HIGH_BITS_OFFSET) or it)
             // Access to the bits of the current line of the Char.
             writeDATA(char[it])
         }
