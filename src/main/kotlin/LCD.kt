@@ -40,7 +40,7 @@ object LCD {
     private const val CLEAR_WAIT_TIME = 10L             // Last wait time (we needed to be more than 5.48ms).
     private const val DISPLAY_ON = 0x0C                 // Display on.
     private const val DISPLAY_OFF = 0x08                // Display off.
-    private const val DISPLAY_AND_CURSOR_ON = 0xF
+    private const val DISPLAY_AND_CURSOR_ON = 0xF       //
     private const val ENTRY_MODE_SET = 0x06             // Entry mode set.
     private const val DISPLAY_CLEAR = 0x01              // Clears the display.
     private const val LINES_AND_FONT = 0x28             // Specify the number of display lines and character font.
@@ -141,7 +141,7 @@ object LCD {
         writeCMD(DISPLAY_CLEAR)
         writeCMD(ENTRY_MODE_SET)
         setCursor(false)
-        // 1.52ms (return home) + 37 microseconds * 0x80 (total cells), worst case (for the others instructions +1ms)~5.48
+        // 1.52ms (return home) + 37 microseconds * 0x80 (total cells), worst case(for the others instructions +1ms)~5.48
         Time.sleep(CLEAR_WAIT_TIME)
         LCD_STATE = true
 
@@ -213,7 +213,7 @@ object LCD {
         writeCMD(SET_CGRAM_ADDRESS or address)
     }
 
-    fun setCursor(on: Boolean){
+    fun setCursor(on: Boolean) {
         if (on) writeCMD(DISPLAY_AND_CURSOR_ON)
         else writeCMD(DISPLAY_ON)
     }

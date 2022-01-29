@@ -8,8 +8,8 @@ import isel.leic.utils.Time
  */
 object Vending {
     //Variable initialization.
-    private const val TIME_OUT = 5000L          // Time to wait for a key.
-    private const val TANKS_WAIT_TIME = 500L    // Tanks wait time.
+    private const val CANCEL_TIME_OUT = 500L    // Time to wait for a key.
+    private const val TANKS_WAIT_TIME = 1000L   // Tanks wait time.
     var FORCE = false                           // Flag that indicates if is needed to print again the initial menu.
     private var VENDING_STATE = false           // Current State of Vending(if it was already initialized).
 
@@ -45,14 +45,15 @@ object Vending {
         FORCE = false
         var pickedProduct: Products.Product? = null
 
-        if (TUI.getKBDKey(TIME_OUT) == App.CONFIRMATION_KEY)
+        if (TUI.getKBDKey(App.FAST_TIME) == App.CONFIRMATION_KEY)
             pickedProduct = App.pickProduct(mode, Products.products, App.Operation.VENDING)
 
         if (App.ERROR)
             return
 
-        if (pickedProduct != null)
+        if (pickedProduct != null) {
             sellProduct(pickedProduct)
+        }
     }
 
     /**
@@ -65,9 +66,10 @@ object Vending {
         var coinsInserted = 0
 
         while (coinsInserted < selectedProduct.price) {
-            if (TUI.getKBDKey(App.TIME_OUT) == App.CONFIRMATION_KEY) {
+            if (TUI.getKBDKey(CANCEL_TIME_OUT) == App.CONFIRMATION_KEY) {
                 TUI.printCancel(coinsInserted)
                 CoinAcceptor.ejectCoins()
+                FORCE = true
                 break
             }
 
@@ -81,7 +83,6 @@ object Vending {
                     App.ERROR = true
                     return
                 }
-
                 TUI.printSell(selectedProduct, selectedProduct.price - coinsInserted)
             }
 
@@ -91,11 +92,11 @@ object Vending {
                 Dispenser.dispense(selectedProduct.id)
                 Products.products[selectedProduct.id]!!.quantity--
                 CoinDeposit.COINS += coinsInserted
+                TUI.printTanks()
+                Time.sleep(TANKS_WAIT_TIME)
+                FORCE = true
                 break
             }
-
-            TUI.printTanks()
-            Time.sleep(TANKS_WAIT_TIME)
         }
     }
 }

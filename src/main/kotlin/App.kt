@@ -8,6 +8,7 @@ import TUI.toInteger
 object App {
     //Variable Initialization.
     const val TIME_OUT = 5000L                  // Time out for waiting for a key.
+    const val FAST_TIME = 100L                  // Faster time for initializing the vending process.
     private const val KEY_UP = 2                // Key to use as up arrow.
     private const val KEY_DOWN = 8              // Key to use as down arrow.
     private const val FIRST_INDEX = 0           // First index of a collection.
@@ -60,9 +61,8 @@ object App {
             if (!M.setMaintenance() && !ERROR) {
                 Vending.run(mode)
                 Maintenance.UPDATE = true
-            }
-            else {
-                Maintenance.run(mode,REQUEST)
+            } else {
+                Maintenance.run(mode, REQUEST)
                 Vending.FORCE = true
             }
         }

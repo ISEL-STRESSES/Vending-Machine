@@ -17,7 +17,7 @@ object KBD {
     private var KBD_STATE = false               // Current State of KBD(if it was already initialized).
 
     // keys that we can expect to read from the matrix keyboard (iterated by columns).
-    val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#', NONE, NONE, NONE, NONE)
+    private val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#', NONE, NONE, NONE, NONE)
 
     /**
      * Initializes the class and clears the ACK in case it is set to One.
@@ -37,7 +37,7 @@ object KBD {
      */
     private fun getValidInterval(keys: CharArray): IntRange {
         var lastIndex = 0
-        for ( i in keys.indices) {
+        for (i in keys.indices) {
             if (keys[i] == NONE)
                 lastIndex = i - 1
         }
@@ -100,6 +100,6 @@ fun main() {
     while (true) {
         println(KBD.waitKey(timeout))    // 2 				// TESTED
         println(KBD.waitKey(timeout))    // 4 				// TESTED
-        println(KBD.waitKey(timeout))   // NONE             // TESTED
+        println(KBD.waitKey(timeout))    // NONE            // TESTED
     }
 }

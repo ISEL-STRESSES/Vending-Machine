@@ -31,8 +31,6 @@ object HAL {
     fun isBit(mask: Int): Boolean {
         require(mask.countOneBits() == MAX_SIZE) { "Mask can only have one set bit" }
         return readBits(mask) == mask
-//        val readBit = readBits(mask)
-//        return readBit != ZERO
     }
 
 

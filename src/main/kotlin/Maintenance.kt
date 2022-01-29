@@ -1,6 +1,7 @@
 //Imports needed for:
 import Products.changeQuantity      // Updating a product quantity
 import TUI.toInteger                // Converting a key to its integer representation.
+import isel.leic.utils.Time
 import kotlin.system.exitProcess    // Terminating the Application.
 
 /**
@@ -10,7 +11,6 @@ import kotlin.system.exitProcess    // Terminating the Application.
 object Maintenance {
     //Variable initialization.
     private const val WAIT_TIME = 5000L             // Default wait time for getting an KBD key.
-    private const val HALF_TIME = 2500L             // Half of required time for faster App speed.
     private const val NORMAL_EXIT_CODE = 0          // Normal exit code when closing the application.
     private const val CONFIRMATION = '5'            // Confirmation key for closing the application.
     private const val DISPENSE_TEST = '1'           // Dispense test selector key.
@@ -21,11 +21,13 @@ object Maintenance {
     private const val MAINTENANCE_MONEY = '*'       // Money for testing the dispense mode.
     private const val ABORT_UPDATE_KEY = '*'        // Clean and Abort key in update product.
     private const val NUMBER_OF_INPUTS = 2          // Number of keys to get for updating a product quantity.
+    private const val CURSOR_QUANTITY_INIT = 4      // Cursor position for printing new quantity into the LCD.
+    private const val RESET_INT = 0                 //
     var UPDATE = true                               // Variable to forcibly print the Maintenance menu.
     private var MAINTENANCE_STATE = false           // Current State of Maintenance(if it was already initialized).
 
     //Array of available Options.
-    private val OPTIONS = arrayOf("1-Dispense Test", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown")
+    private val OPTIONS = arrayOf("1-Dispense Test", "2-Update Prod.", "3-Remove Prod.", "4-Shutdown", "5-Problems")
 
     /**
      * Function that initializes the class of the Maintenance.
@@ -60,6 +62,7 @@ object Maintenance {
      */
     private fun printMaintenance(update: Boolean) {
         TUI.printMaintenanceMenu(OPTIONS, update)
+        Time.sleep(2000L)
         UPDATE = false
     }
 
@@ -70,8 +73,8 @@ object Maintenance {
      */
     fun run(mode: App.Mode, error: String?) {
         printMaintenance(UPDATE)
-        var key : Char
-        while (TUI.getKBDKey(HALF_TIME).also { key = it } != TUI.NONE){
+        var key: Char
+        while (TUI.getKBDKey(App.FAST_TIME).also { key = it } != TUI.NONE) {
             when (key) {
                 DISPENSE_TEST -> dispenseTest(mode)
                 UPDATE_PRODUCT -> updateProduct(mode)
@@ -82,9 +85,16 @@ object Maintenance {
         }
     }
 
+    /**
+     * Function that prints any problem the machine might have.
+     * @param error Error to print in maintenance mode.
+     */
     private fun problems(error: String?) {
-        if (error != null)
-            TUI.printProblems(error)
+        TUI.printProblem(error)
+        if (error == null){
+            UPDATE = true
+            return
+        }
         if (TUI.getKBDKey(WAIT_TIME) == App.CONFIRMATION_KEY)
             TUI.problemSolved()
         UPDATE = true
@@ -95,37 +105,41 @@ object Maintenance {
      * @param mode Mode to browse trough products.
      */
     private fun updateProduct(mode: App.Mode) {
-        val product = App.pickProduct(mode, Products.products, App.Operation.MAINTENANCE) ?: return
+        val product = App.pickProduct(mode, Products.products, App.Operation.MAINTENANCE)
+        if (product == null){
+            UPDATE = true
+            return
+        }
         var key: Char
-        var intKey = 0
+        var intKey = RESET_INT
         do {
             TUI.printProductName(product)
             TUI.printUpdateQuantity(product)
             var i = 0
-            while (i < NUMBER_OF_INPUTS && intKey >= 0) {
+            while (i < NUMBER_OF_INPUTS && intKey >= RESET_INT) {
                 key = TUI.getKBDKey(WAIT_TIME)
-                if (key == TUI.NONE) {
-                    UPDATE = true
-                    return
-                }
-                else {
-                    when (key) {
-                        in App.KEY_INTERVAL -> {
-                            intKey = intKey * App.MULTIPLIER + key.toInteger()
-                            TUI.printInt(key,4+i)
-                        }
-                        ABORT_UPDATE_KEY -> {
-                            if (i == 0) return
-                            else intKey = 0
-                            i = -1
-                        }
-                        else -> i--
+                when (key) {
+                    TUI.NONE -> {
+                        UPDATE = true
+                        return
                     }
+                    in App.KEY_INTERVAL -> {
+                        intKey = intKey * App.MULTIPLIER + key.toInteger()
+                        TUI.printInt(key, CURSOR_QUANTITY_INIT + i++)
+                    }
+                    ABORT_UPDATE_KEY -> {
+                        if (i == 0) {
+                            UPDATE = true
+                            return
+                        }
+                        else intKey = RESET_INT
+                        i--
+                    }
+                    else -> i--
                 }
-                i++
             }
         } while (intKey > Products.MAXIMUM_QUANTITY)
-        TUI.printUpdateConfirm(product,intKey)
+        TUI.printUpdateConfirm(product, intKey)
         if (TUI.getKBDKey(WAIT_TIME) == CONFIRMATION)
             Products.products[product.id] = product.changeQuantity(intKey)
         UPDATE = true
@@ -147,7 +161,7 @@ object Maintenance {
      */
     private fun dispenseTest(mode: App.Mode) {
         val product = App.pickProduct(mode, Products.products, App.Operation.MAINTENANCE)
-        if (product == null ) {
+        if (product == null) {
             UPDATE = true
             return
         }
@@ -160,7 +174,6 @@ object Maintenance {
         Dispenser.dispense(product.id)
         UPDATE = true
     }
-
 }
 
 /**
@@ -170,6 +183,6 @@ fun main() {
     Maintenance.init()
     val mode = App.Mode.INDEX
     while (true)
-        Maintenance.run(mode,null)
+        Maintenance.run(mode, null)
     // TODO: 26/01/2022 HAS AN UNDOCUMENTED FIXTURE
 }

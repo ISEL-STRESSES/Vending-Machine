@@ -1,4 +1,8 @@
+//imports needed for testing the class.
+import TUI.toInteger
 import isel.leic.utils.Time
+import java.text.SimpleDateFormat
+import kotlin.system.exitProcess
 
 /**
  * Interface that implements communication between the LCD and the KBD.
@@ -28,11 +32,11 @@ object TUI {
     private const val EVEN = 0                  // Even checker.
     private var TUI_STATE = false               // Current State of Products(if it was already initialized).
 
-    // New chars to add to the LCD. £$€♫
+    // New chars to add to the LCD.
     // Bit map for the currency char. ₿
     private val BITCOIN_MAP = intArrayOf(0b01010, 0b11110, 0b01011, 0b01110, 0b01011, 0b11110, 0b01010, 0b00000)
     private const val BITCOIN_CHAR_CODE = 0     // Char code for the bitcoin char in the LCD. ₿
-    private const val BITCOIN_CGRAM_POSITION = 0// Bitcoin address in the CGRAM. ₿
+    private const val BITCOIN_CGRAM_POSITION = 0// Currency char address in the CGRAM. ₿
 
     // Bit map for the arrow char.
     private val ARROW_MAP = intArrayOf(0b00100, 0b01110, 0b11111, 0b00100, 0b11111, 0b01110, 0b00100, 0b00000)
@@ -64,7 +68,7 @@ object TUI {
      * @param mode Current mode of product selection, by default is [App.Mode.INDEX].
      */
     fun printProduct(product: Products.Product, mode: App.Mode = App.Mode.INDEX) {
-        clearLCD()
+        LCD.clear()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText(
             product.id.toFilledString() + if (mode == App.Mode.ARROWS) ARROW_CHAR_CODE.toChar() else EMPTY_STRING,
@@ -90,7 +94,7 @@ object TUI {
      * @param index Index of a [product] if it is null.
      */
     fun printUnavailableProduct(product: Products.Product?, index: Int) {
-        clearLCD()
+        LCD.clear()
         printText("Product ${product?.id ?: index}", Position.CENTER, FIRST_LINE)
         printText("not available", Position.CENTER, SECOND_LINE)
     }
@@ -107,7 +111,7 @@ object TUI {
      * Function that prints out of service.
      */
     fun printOutOfService() {
-        clearLCD()
+        LCD.clear()
         printText("OUT OF SERVICE", Position.CENTER, FIRST_LINE)
     }
 
@@ -116,7 +120,7 @@ object TUI {
      * @param product Product to change its quantity.
      */
     fun printUpdateQuantity(product: Products.Product) {
-        clearLCD()
+        LCD.clear()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText("Qty:??", Position.LEFT, SECOND_LINE)
         LCD.setCursor(true)
@@ -129,16 +133,16 @@ object TUI {
      * @param price Price of the product.
      */
     fun printSell(product: Products.Product, price: Int) {
-        clearLCD()
+        LCD.clear()
         printText(product.name, Position.CENTER, FIRST_LINE)
-        printText(price.toString(), Position.CENTER, SECOND_LINE)
+        printText(price.toString() + BITCOIN_CHAR_CODE.toChar(), Position.CENTER, SECOND_LINE)
     }
 
     /**
      * Print the thank-you message in the LCD.
      */
     fun printTanks() {
-        clearLCD()
+        LCD.clear()
         printText("Thank you", Position.CENTER, FIRST_LINE)
         printText("See you again", Position.CENTER, SECOND_LINE)
     }
@@ -148,7 +152,7 @@ object TUI {
      * @param currentTime Time to print in the menu.
      */
     fun printVendingMenu(currentTime: String) {
-        clearLCD()
+        LCD.clear()
         printText("Vending Machine", Position.LEFT, FIRST_LINE)
         printText(currentTime, Position.LEFT, SECOND_LINE)
     }
@@ -159,9 +163,9 @@ object TUI {
      * @param options Array of available options.
      * @param update Flag to forcibly print all the maintenance menu.
      */
-    fun printMaintenanceMenu(options: Array<String>, update:Boolean) {
+    fun printMaintenanceMenu(options: Array<String>, update: Boolean) {
         if (update) {
-            clearLCD()
+            LCD.clear()
             printText("Maintenance Mode", Position.RIGHT, FIRST_LINE)
             OPTIONS_INDEX = 0
             toggleThroughOptions(options)
@@ -186,7 +190,7 @@ object TUI {
      * @param product Product to collect.
      */
     fun printCollect(product: Products.Product) {
-        clearLCD()
+        LCD.clear()
         printProductName(product)
         printText("Collect Product", Position.CENTER, SECOND_LINE)
     }
@@ -196,7 +200,7 @@ object TUI {
      * @param product to print information in the LCD.
      */
     fun printMaintenanceSell(product: Products.Product) {
-        clearLCD()
+        LCD.clear()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText("*- To Print", Position.CENTER, SECOND_LINE)
     }
@@ -206,10 +210,10 @@ object TUI {
      * @param coins Coins to be returned.
      */
     fun printCancel(coins: Int) {
-        clearLCD()
+        LCD.clear()
         printText("Vending Aborted", Position.CENTER, FIRST_LINE)
         if (coins > NO_COINS)
-            printText("Return $coins", Position.CENTER, SECOND_LINE)
+            printText("Return $coins"+BITCOIN_CHAR_CODE.toChar(), Position.CENTER, SECOND_LINE)
     }
 
     /**
@@ -218,7 +222,7 @@ object TUI {
      * @param position Position for printing in an LCD line(Left, Center, Right).
      */
     private fun printConfirmation(option: String, position: Position) {
-        clearLCD()
+        LCD.clear()
         printText(option, position, FIRST_LINE)
         printText("5-Yes", Position.LEFT, SECOND_LINE)
         printText("other-No", Position.RIGHT, SECOND_LINE)
@@ -267,12 +271,6 @@ object TUI {
         LCD.write(fill)
     }
 
-    /**
-     * Function that cleans the hole LCD.
-     */
-    private fun clearLCD() {
-        LCD.clear()
-    }
 
     /**
      * Function that converts a Char to Integer.
@@ -296,17 +294,17 @@ object TUI {
      * Function that prints the problem send by the App.
      * @param problem Problem to print.
      */
-    fun printProblems(problem: String) {
-        clearLCD()
-        printText("Problems", Position.CENTER, FIRST_LINE)
-        printText(problem, Position.LEFT, SECOND_LINE)
+    fun printProblem(problem: String?) {
+        LCD.clear()
+        printText("Problem", Position.CENTER, FIRST_LINE)
+        printText(problem ?: "No problems", Position.LEFT, SECOND_LINE)
     }
 
     /**
      * Function that print the problem solved message.
      */
     fun problemSolved() {
-        clearLCD()
+        LCD.clear()
         printText("Problem Solved", Position.CENTER, FIRST_LINE)
         printText("Thank you", Position.CENTER, SECOND_LINE)
     }
@@ -317,7 +315,7 @@ object TUI {
      * @param column Place to print the [key].
      */
     fun printInt(key: Char, column: Int) {
-        printText(key.toString(),Position.LEFT, SECOND_LINE,column)
+        printText(key.toString(), Position.LEFT, SECOND_LINE, column)
     }
 
     /**
@@ -327,16 +325,16 @@ object TUI {
      */
     fun printUpdateConfirm(product: Products.Product, intKey: Int) {
         LCD.setCursor(false)
-        clearLCD()
+        LCD.clear()
         printConfirmation("Update", Position.LEFT)
-        printText("${product.name}=$intKey",Position.RIGHT, FIRST_LINE)
+        printText("${product.name}=$intKey", Position.RIGHT, FIRST_LINE)
     }
 
     /**
      * Function that print the shutdown message in the LCD.
      */
     fun printShutdown() {
-        clearLCD()
+        LCD.clear()
         printConfirmation("Shutdown", Position.CENTER)
     }
 }
@@ -346,9 +344,63 @@ object TUI {
  */
 fun main() {
     TUI.init()
-    val product = Products.Product(1,"Jack Daniels", 2, 4)
+    val product = Products.Product(1, "Jack Daniels", 2, 4)
+    val currentTime = SimpleDateFormat("dd-MM-yyyy HH:mm").format(Time.getTimeInMillis())
     TUI.printProduct(product)
     Time.sleep(1000L)
+    LCD.clear()
     TUI.printProduct(product, App.Mode.ARROWS)
-
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printUnavailableProduct(null,7)
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printProduct(product)
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printOutOfService()
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printUpdateQuantity(product)
+    Time.sleep(1000L)
+    LCD.clear()
+    for (i in 0..product.price){
+        TUI.printSell(product,product.price-i)
+        Time.sleep(1000L)
+        LCD.clear()
+    }
+    TUI.printTanks()
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printVendingMenu(currentTime)
+    Time.sleep(1000L)
+    LCD.clear()
+    for (i in 0..4) {
+        TUI.printMaintenanceMenu(arrayOf("Option1", "Option2", "Option3"), false)
+        Time.sleep(1000L)
+        LCD.clear()
+    }
+    TUI.printCollect(product)
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printMaintenanceSell(product)
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printCancel(3)
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printProblem("Something")
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.problemSolved()
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printInt(TUI.getKBDKey(10000L),0)
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printUpdateConfirm(product,TUI.getKBDKey(1000L).toInteger())
+    Time.sleep(1000L)
+    LCD.clear()
+    TUI.printShutdown()
+    exitProcess(0)
 }
