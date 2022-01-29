@@ -10,7 +10,7 @@ object Vending {
     //Variable initialization.
     private const val TIME_OUT = 5000L          // Time to wait for a key.
     private const val TANKS_WAIT_TIME = 500L    // Tanks wait time.
-    var force = false                            // Flag that indicates if is needed to print again the initial menu.
+    var FORCE = false                           // Flag that indicates if is needed to print again the initial menu.
     private var VENDING_STATE = false           // Current State of Vending(if it was already initialized).
 
     /**
@@ -40,19 +40,19 @@ object Vending {
      * @param mode Mode needed for the [App.pickProduct].
      * @return Returns requests if there is any
      */
-    fun run(mode: App.Mode): String? {
-        printInitialMenu(force)
-
+    fun run(mode: App.Mode) {
+        printInitialMenu(FORCE)
+        FORCE = false
         var pickedProduct: Products.Product? = null
 
-        if (TUI.getKBDKey(TIME_OUT) == TUI.CONFIRMATION_KEY)
-            pickedProduct = App.pickProduct(mode, Products.products)
+        if (TUI.getKBDKey(TIME_OUT) == App.CONFIRMATION_KEY)
+            pickedProduct = App.pickProduct(mode, Products.products, App.Operation.VENDING)
 
-        if (pickedProduct != null) {
-            return sellProduct(pickedProduct)
-        }
+        if (App.ERROR)
+            return
 
-        return null
+        if (pickedProduct != null)
+            sellProduct(pickedProduct)
     }
 
     /**
@@ -60,11 +60,12 @@ object Vending {
      * @param selectedProduct Selected product to sell.
      * @return Returns a [App.Operation.REQUESTS] if there is any.
      */
-    private fun sellProduct(selectedProduct: Products.Product): String? {
+    private fun sellProduct(selectedProduct: Products.Product) {
         TUI.printSell(selectedProduct, selectedProduct.price)
         var coinsInserted = 0
+
         while (coinsInserted < selectedProduct.price) {
-            if (TUI.getKBDKey(App.TIME_OUT) == TUI.CONFIRMATION_KEY) {
+            if (TUI.getKBDKey(App.TIME_OUT) == App.CONFIRMATION_KEY) {
                 TUI.printCancel(coinsInserted)
                 CoinAcceptor.ejectCoins()
                 break
@@ -73,6 +74,14 @@ object Vending {
             if (CoinAcceptor.hasCoin()) {
                 CoinAcceptor.acceptCoin()
                 coinsInserted++
+
+                if (CoinDeposit.depositRequest() != null) {
+                    TUI.printOutOfService()
+                    App.REQUEST = CoinDeposit.depositRequest()
+                    App.ERROR = true
+                    return
+                }
+
                 TUI.printSell(selectedProduct, selectedProduct.price - coinsInserted)
             }
 
@@ -88,13 +97,6 @@ object Vending {
             TUI.printTanks()
             Time.sleep(TANKS_WAIT_TIME)
         }
-
-        val depositRequest = CoinDeposit.depositRequest()
-        if (depositRequest != null) {
-            TUI.printOutOfService(depositRequest)
-            return depositRequest
-        }
-        return null
     }
 }
 

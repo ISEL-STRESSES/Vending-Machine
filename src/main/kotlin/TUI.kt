@@ -1,3 +1,5 @@
+import isel.leic.utils.Time
+
 /**
  * Interface that implements communication between the LCD and the KBD.
  * @author Carlos Pereira, Pedro Poeira, Filipa Machado.
@@ -5,12 +7,11 @@
 object TUI {
     //Variable Initialization.
     private const val LINE_SIZE = 64            // Max line size in the LCD(Addresses).
-    private const val DEFAULT_TIME_OUT = 1000L  // Default Time out for waiting for a key.
     private const val INITIAL_POSITION = 0      // Initial cell position on any line.
     private const val FIRST_LINE = 0            // First Line in the LCD.
     private const val SECOND_LINE = 1           // Second Line in the LCD.
     private const val OPTIONS_LINE = SECOND_LINE// Line to print the options.
-    private const val FIRST_COLUMN = 0
+    private const val FIRST_COLUMN = 0          // First column in the LCD.
     private const val DEFAULT_NUMBER_SIZE = 2   // Default number size to write in the LCD.
     const val NONE = KBD.NONE                   // Value that represents a non-existent key.
     private var OPTIONS_INDEX = 0               // Current Index in the options Array.
@@ -19,9 +20,6 @@ object TUI {
     private const val EMPTY_STRING = ""         // Auxiliary empty string.
     private const val ZERO_CHAR = '0'           // Char needed for getting the integer values of other chars.
     private const val QUANTITY_INDICATOR = '#'  // Quantity indicator.
-    const val CONFIRMATION_KEY = '#'            // Character that selects teh current product.
-    const val MODE_KEY = '*'                    // Character that changes modes(Arrows or Index).
-    private const val MULTIPLIER = 10           // Multiplier for getting 2 keys form Keyboard.
     private const val PARITY_CHECK = 2          // Checker of parity.
     private const val NO_COINS = 0              // No coins to return.
     private const val INIT_QUANTITY_POSITION = 4// Initial cursor position in quantity update.
@@ -52,8 +50,6 @@ object TUI {
      */
     fun init() {
         if (TUI_STATE) return
-        HAL.init()
-        SerialEmitter.init()
         LCD.init()
         KBD.init()
         LCD.loadChar(BITCOIN_CGRAM_POSITION, BITCOIN_MAP)
@@ -65,6 +61,7 @@ object TUI {
      * Function that prints the information of a [product] on the LCD, if it doesn't have any quantity
      * available prints "Product not available".
      * @param product Product to print information about.
+     * @param mode Current mode of product selection, by default is [App.Mode.INDEX].
      */
     fun printProduct(product: Products.Product, mode: App.Mode = App.Mode.INDEX) {
         clearLCD()
@@ -90,6 +87,7 @@ object TUI {
     /**
      * Function that prints an unavailable product.
      * @param product Unavailable product to Print.
+     * @param index Index of a [product] if it is null.
      */
     fun printUnavailableProduct(product: Products.Product?, index: Int) {
         clearLCD()
@@ -106,24 +104,22 @@ object TUI {
     }
 
     /**
-     * Function that prints the reason for the machine to be out of service.
-     * @param reason Reason of Out Of Service.
+     * Function that prints out of service.
      */
-    fun printOutOfService(reason: String) {
+    fun printOutOfService() {
         clearLCD()
         printText("OUT OF SERVICE", Position.CENTER, FIRST_LINE)
-        printText(reason, Position.CENTER, SECOND_LINE)
     }
 
     /**
      * Function that prints the quantity update.
      * @param product Product to change its quantity.
      */
-    fun printUpdateQuantity(product: Products.Product,blink: Boolean = true) {
+    fun printUpdateQuantity(product: Products.Product) {
         clearLCD()
         printText(product.name, Position.CENTER, FIRST_LINE)
         printText("Qty:??", Position.LEFT, SECOND_LINE)
-        LCD.setCursorOn(true)
+        LCD.setCursor(true)
         LCD.cursor(SECOND_LINE, INIT_QUANTITY_POSITION)
     }
 
@@ -161,13 +157,14 @@ object TUI {
     /**
      * Function that prints the Vending Machine mode in Maintenance mode.
      * @param options Array of available options.
+     * @param update Flag to forcibly print all the maintenance menu.
      */
-    fun printMaintenanceMenu(options: Array<String>, update:Boolean, first: Boolean) {
-        if (update || first) {
+    fun printMaintenanceMenu(options: Array<String>, update:Boolean) {
+        if (update) {
             clearLCD()
             printText("Maintenance Mode", Position.RIGHT, FIRST_LINE)
+            OPTIONS_INDEX = 0
             toggleThroughOptions(options)
-
         } else {
             clearLine(OPTIONS_LINE)
             toggleThroughOptions(options)
@@ -180,7 +177,6 @@ object TUI {
      */
     private fun toggleThroughOptions(options: Array<String>) {
         printText(options[OPTIONS_INDEX++], Position.LEFT, SECOND_LINE)
-        //Time.sleep(DEFAULT_TIME_OUT)
         if (OPTIONS_INDEX == options.size)
             OPTIONS_INDEX = options.indices.first
     }
@@ -190,9 +186,9 @@ object TUI {
      * @param product Product to collect.
      */
     fun printCollect(product: Products.Product) {
-
-        printText("Collect Product", Position.CENTER, SECOND_LINE)
+        clearLCD()
         printProductName(product)
+        printText("Collect Product", Position.CENTER, SECOND_LINE)
     }
 
     /**
@@ -218,10 +214,12 @@ object TUI {
 
     /**
      * Function that prints the confirmation of Shutdown on the LCD.
+     * @param option Option for printing in the LCD.
+     * @param position Position for printing in an LCD line(Left, Center, Right).
      */
-    fun printShutdown() {
+    private fun printConfirmation(option: String, position: Position) {
         clearLCD()
-        printText("Shutdown", Position.CENTER, FIRST_LINE)
+        printText(option, position, FIRST_LINE)
         printText("5-Yes", Position.LEFT, SECOND_LINE)
         printText("other-No", Position.RIGHT, SECOND_LINE)
     }
@@ -231,9 +229,10 @@ object TUI {
      * @param text Text to write in the LCD.
      * @param position Position to place the cursor to write, by default is [Position.LEFT].
      * @param line Line to write the [text].
+     * @param column Column to write the [text], by default is [INITIAL_POSITION].
      * @param clear If the flag is set clears the current Line.
      */
-    private fun printText(text: String, position: Position, line: Int, clear: Boolean = false) {
+    private fun printText(text: String, position: Position, line: Int, column: Int = INITIAL_POSITION, clear: Boolean = false) {
         if (clear)
             clearLine(line)
         //if somehow we forget some space in the beginning or end.
@@ -250,7 +249,7 @@ object TUI {
                 LCD.write(cleanedText)
             }
             else -> {
-                LCD.cursor(line, INITIAL_POSITION)
+                LCD.cursor(line, column)
                 LCD.write(cleanedText)
             }
         }
@@ -276,24 +275,6 @@ object TUI {
     }
 
     /**
-     * Function that translates an KBD key into it's integer representation, if it has one.
-     * @param timeout Timeout to wait for a key.
-     * @return a Key in its integer representation.
-     */
-    fun getInt(timeout: Long): Int {
-        var value = 0
-        val kbdInt = getKBDKey(timeout)
-
-        if (kbdInt in (KBD.keys.filter { it != CONFIRMATION_KEY && it != MODE_KEY }))
-            value = kbdInt.toInteger()
-
-        val newInt = KBD.waitKey(timeout)
-        if (newInt in (KBD.keys.filter { it != CONFIRMATION_KEY && it != MODE_KEY }))
-            value = value * MULTIPLIER + newInt.toInteger()
-        return value
-    }
-
-    /**
      * Function that converts a Char to Integer.
      * @receiver Char to convert.
      * @return Char Converted.
@@ -310,16 +291,64 @@ object TUI {
     fun getKBDKey(timeOut: Long): Char {
         return KBD.waitKey(timeOut)
     }
+
+    /**
+     * Function that prints the problem send by the App.
+     * @param problem Problem to print.
+     */
+    fun printProblems(problem: String) {
+        clearLCD()
+        printText("Problems", Position.CENTER, FIRST_LINE)
+        printText(problem, Position.LEFT, SECOND_LINE)
+    }
+
+    /**
+     * Function that print the problem solved message.
+     */
+    fun problemSolved() {
+        clearLCD()
+        printText("Problem Solved", Position.CENTER, FIRST_LINE)
+        printText("Thank you", Position.CENTER, SECOND_LINE)
+    }
+
+    /**
+     * Function that print an Integer in the cell given by [column].
+     * @param key Integer to print.
+     * @param column Place to print the [key].
+     */
+    fun printInt(key: Char, column: Int) {
+        printText(key.toString(),Position.LEFT, SECOND_LINE,column)
+    }
+
+    /**
+     * Function that print the confirmation quest of the update product function.
+     * @param product Product to print for confirmation.
+     * @param intKey New quantity of a given product.
+     */
+    fun printUpdateConfirm(product: Products.Product, intKey: Int) {
+        LCD.setCursor(false)
+        clearLCD()
+        printConfirmation("Update", Position.LEFT)
+        printText("${product.name}=$intKey",Position.RIGHT, FIRST_LINE)
+    }
+
+    /**
+     * Function that print the shutdown message in the LCD.
+     */
+    fun printShutdown() {
+        clearLCD()
+        printConfirmation("Shutdown", Position.CENTER)
+    }
 }
 
 /**
- * Main function for testing the Class. TODO
+ * Main function for testing the Class.
  */
 fun main() {
-    HAL.init()
-    SerialEmitter.init()
-    LCD.init()
-    KBD.init()
     TUI.init()
-    // TODO: 26/01/2022 BRUTE FORCE TEST
+    val product = Products.Product(1,"Jack Daniels", 2, 4)
+    TUI.printProduct(product)
+    Time.sleep(1000L)
+    TUI.printProduct(product, App.Mode.ARROWS)
+
 }

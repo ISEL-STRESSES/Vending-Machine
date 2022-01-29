@@ -1,4 +1,4 @@
-//Import needed for todo maybe not needed
+//Import needed for converting a key into its value.
 import TUI.toInteger
 
 /**
@@ -7,16 +7,19 @@ import TUI.toInteger
  */
 object App {
     //Variable Initialization.
-    const val TIME_OUT = 5000L          // Time out for waiting for a key.
+    const val TIME_OUT = 5000L                  // Time out for waiting for a key.
     private const val KEY_UP = 2                // Key to use as up arrow.
     private const val KEY_DOWN = 8              // Key to use as down arrow.
     private const val FIRST_INDEX = 0           // First index of a collection.
     private const val INDEX_OFFSET = 1          // Offset needed for browsing through products.
-    private val KEY_INTERVAL = ('0'..'9')       // Interval of integer keys.
-    private const val MULTIPLIER = 10           // Multiplier for getting 2 keys form Keyboard.
-    private var ERROR = false                   // Flag of for error detection.
-    private var force = Vending.force           // Flag for printing the initial menu again.
+    val KEY_INTERVAL = ('0'..'9')               // Interval of integer keys.
+    const val CONFIRMATION_KEY = '#'            // Character that selects teh current product.
+    private const val MODE_KEY = '*'            // Character that changes modes(Arrows or Index).
+    const val MULTIPLIER = 10                   // Multiplier for getting 2 keys form Keyboard.
+    var ERROR = false                           // Flag of for error detection.
+    private var force = Vending.FORCE           // Flag for printing the initial menu again.
     private var APP_STATE = false               // Current State of App(if it was already initialized).
+    var REQUEST: String? = null                 // Request send by any vending machine module.
 
     /**
      * Enumerate that has all the selection modes implemented for selecting a product.
@@ -42,33 +45,26 @@ object App {
         Products.init()
         CoinDeposit.init()
         AppTime.init()
+
         APP_STATE = true
     }
 
     /**
      * Function that runs the Vending Machine app.
      */
-    fun runApp(){
+    fun runApp() {
         //initializes all the app lower blocks
         appLowerBlocksInit()
-        var mode: Operation
-        val mode2 = Mode.INDEX
-
+        val mode = Mode.INDEX
         while (true) {
-            mode = if (M.setMaintenance())
-                Operation.MAINTENANCE
-            else Operation.VENDING
-            var request :String? = null
-            when(mode) {
-                Operation.VENDING -> {
-                    request = Vending.run(mode2)
-                    if (request != null )
-                        mode = Operation.REQUESTS
-                }
-                Operation.MAINTENANCE -> Maintenance.run(mode2)
-                Operation.REQUESTS -> Requests.run(request) //TODO("NOT YET IMPLEMENTED")
+            if (!M.setMaintenance() && !ERROR) {
+                Vending.run(mode)
+                Maintenance.UPDATE = true
             }
-
+            else {
+                Maintenance.run(mode,REQUEST)
+                Vending.FORCE = true
+            }
         }
     }
 
@@ -78,15 +74,16 @@ object App {
      * @param products Array that has all the product of the Vending Machine.
      * @return Returns a picked Product or null if the sequence wasn't right.
      */
-    fun pickProduct(mode: Mode, products: Array<Products.Product?>, operation: Operation = Operation.VENDING): Products.Product? {
+    fun pickProduct(mode: Mode, products: Array<Products.Product?>, operation: Operation): Products.Product? {
 
         var currentMode = mode
         var key: Char
 
         var product = products.first { it != null && it.flagDetection(operation) }
         if (product == null) {
-            TUI.printOutOfService("Unavailable Prod")
+            REQUEST = "Unavailable Prod"
             ERROR = true
+            TUI.printOutOfService()
             return null
         }
 
@@ -95,7 +92,6 @@ object App {
         var intKey = index
 
         while (TUI.getKBDKey(TIME_OUT).also { key = it } != TUI.NONE) {
-            // TODO: 26/01/2022 QUEIMA SE TODO QUANDO PRINTA INVALID PRODUCTS
             if (key in KEY_INTERVAL) {
                 intKey = intKey * MULTIPLIER + key.toInteger()
             }
@@ -105,8 +101,8 @@ object App {
             }
 
             when (key) {
-                TUI.MODE_KEY -> currentMode = currentMode.switchMode()
-                TUI.CONFIRMATION_KEY -> return product
+                MODE_KEY -> currentMode = currentMode.switchMode()
+                CONFIRMATION_KEY -> return if (product != null && product.flagDetection(operation)) product else continue
                 in KEY_INTERVAL -> {
                     if (currentMode == Mode.INDEX) {
                         index = intKey
@@ -141,8 +137,12 @@ object App {
      * @param key Key to check if is available for [Mode.ARROWS].
      * @return Returns a product after one key pressed.
      */
-    private fun Array<Products.Product?>.browseProducts(currentIndex: Int = FIRST_INDEX, key: Int/*Char*/, operation: Operation): Products.Product {
-        return when (key/*.toInteger()*/) {
+    private fun Array<Products.Product?>.browseProducts(
+        currentIndex: Int,
+        key: Int,
+        operation: Operation
+    ): Products.Product {
+        return when (key) {
             KEY_DOWN -> previousValid(currentIndex, operation)
             KEY_UP -> nextValid(currentIndex, operation)
             else -> get(currentIndex)!!

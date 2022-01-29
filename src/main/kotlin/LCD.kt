@@ -140,7 +140,7 @@ object LCD {
         writeCMD(DISPLAY_OFF)
         writeCMD(DISPLAY_CLEAR)
         writeCMD(ENTRY_MODE_SET)
-        setCursorOn()
+        setCursor(false)
         // 1.52ms (return home) + 37 microseconds * 0x80 (total cells), worst case (for the others instructions +1ms)~5.48
         Time.sleep(CLEAR_WAIT_TIME)
         LCD_STATE = true
@@ -213,7 +213,7 @@ object LCD {
         writeCMD(SET_CGRAM_ADDRESS or address)
     }
 
-    fun setCursorOn(on: Boolean = false){
+    fun setCursor(on: Boolean){
         if (on) writeCMD(DISPLAY_AND_CURSOR_ON)
         else writeCMD(DISPLAY_ON)
     }
