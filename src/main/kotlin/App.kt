@@ -7,7 +7,7 @@ import TUI.toInteger
  */
 object App {
     //Variable Initialization.
-    const val TIME_OUT = 5000L                  // Time out for waiting for a key.
+    private const val TIME_OUT = 5000L          // Time out for waiting for a key.
     const val FAST_TIME = 100L                  // Faster time for initializing the vending process.
     private const val KEY_UP = 2                // Key to use as up arrow.
     private const val KEY_DOWN = 8              // Key to use as down arrow.
@@ -46,7 +46,6 @@ object App {
         Products.init()
         CoinDeposit.init()
         AppTime.init()
-
         APP_STATE = true
     }
 
@@ -137,11 +136,7 @@ object App {
      * @param key Key to check if is available for [Mode.ARROWS].
      * @return Returns a product after one key pressed.
      */
-    private fun Array<Products.Product?>.browseProducts(
-        currentIndex: Int,
-        key: Int,
-        operation: Operation
-    ): Products.Product {
+    private fun Array<Products.Product?>.browseProducts(currentIndex: Int, key: Int, operation: Operation): Products.Product {
         return when (key) {
             KEY_DOWN -> previousValid(currentIndex, operation)
             KEY_UP -> nextValid(currentIndex, operation)

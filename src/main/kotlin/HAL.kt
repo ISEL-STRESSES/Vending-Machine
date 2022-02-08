@@ -33,7 +33,6 @@ object HAL {
         return readBits(mask) == mask
     }
 
-
     /**
      * Function that reads the Input port through the One's of [mask].
      * @param mask Mask corresponding to the bits that we can read.
@@ -88,7 +87,6 @@ object HAL {
     private fun usbPortIn(): Int {
         return UsbPort.`in`().inv()
     }
-
 }
 
 /**

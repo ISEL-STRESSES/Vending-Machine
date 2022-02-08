@@ -31,7 +31,7 @@ object M {
  * Main function for testing.
  */
 fun main() {
-    HAL.init()
+    M.init()
     val signal = M.setMaintenance()
     println("$signal")
 }

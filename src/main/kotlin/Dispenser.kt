@@ -29,7 +29,6 @@ object Dispenser {
  * Main function for testing the Dispenser interface.
  */
 fun main() {
-    SerialEmitter.init()
     Dispenser.init()
     val firstProductId = 9
     val secondProductId = 7

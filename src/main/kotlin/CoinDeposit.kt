@@ -17,7 +17,7 @@ object CoinDeposit {
     private const val CURRENT_LOG = 1                       // Size adder for accounting for the new log of Coins.
     private const val MINIMUM_SIZE = 1                      // Minimum size that the File needs to have for storing previous logs.
     private const val INCREMENT = 10                        // Increment for each sale
-    private var DEPOSIT_MAX_CAPACITY = INCREMENT // Max capacity of the Coin Deposit.
+    private var DEPOSIT_MAX_CAPACITY = INCREMENT            // Max capacity of the Coin Deposit.
     private const val DEPOSIT_REQUEST = "CoinDeposit Full"  // Deposit Full Request.
     private var COIN_DEPOSIT_STATE = false                  // Current State of Coin Deposit(if it was already initialized).
 
@@ -27,7 +27,7 @@ object CoinDeposit {
      * @property date date to write in the Coin Deposit file for Log.
      * @property time time to write in the Coin Deposit file for Log.
      */
-    data class Coin(var quantity: Int, val date: String, val time: String)
+    data class Coin(val quantity: Int, val date: String, val time: String)
 
     /**
      * Function that initializes the class Coin Deposit.

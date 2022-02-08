@@ -1,7 +1,7 @@
 //Imports needed for:
 import Products.changeQuantity      // Updating a product quantity
 import TUI.toInteger                // Converting a key to its integer representation.
-import isel.leic.utils.Time
+import isel.leic.utils.Time         // Adding some delay when printing options
 import kotlin.system.exitProcess    // Terminating the Application.
 
 /**
@@ -11,6 +11,7 @@ import kotlin.system.exitProcess    // Terminating the Application.
 object Maintenance {
     //Variable initialization.
     private const val WAIT_TIME = 5000L             // Default wait time for getting an KBD key.
+    private const val SECOND_WAIT_TIME = 2000L      // Second wait time for adding some delay to the program
     private const val NORMAL_EXIT_CODE = 0          // Normal exit code when closing the application.
     private const val CONFIRMATION = '5'            // Confirmation key for closing the application.
     private const val DISPENSE_TEST = '1'           // Dispense test selector key.
@@ -22,7 +23,8 @@ object Maintenance {
     private const val ABORT_UPDATE_KEY = '*'        // Clean and Abort key in update product.
     private const val NUMBER_OF_INPUTS = 2          // Number of keys to get for updating a product quantity.
     private const val CURSOR_QUANTITY_INIT = 4      // Cursor position for printing new quantity into the LCD.
-    private const val RESET_INT = 0                 //
+    private const val RESET_INT = 0                 // Value to overwrite an Integer key.
+    private const val INIT_ITERATOR = 0             // Initial iterator when capturing several keys.
     var UPDATE = true                               // Variable to forcibly print the Maintenance menu.
     private var MAINTENANCE_STATE = false           // Current State of Maintenance(if it was already initialized).
 
@@ -62,7 +64,7 @@ object Maintenance {
      */
     private fun printMaintenance(update: Boolean) {
         TUI.printMaintenanceMenu(OPTIONS, update)
-        Time.sleep(2000L)
+        Time.sleep(SECOND_WAIT_TIME)
         UPDATE = false
     }
 
@@ -91,12 +93,15 @@ object Maintenance {
      */
     private fun problems(error: String?) {
         TUI.printProblem(error)
-        if (error == null){
+        if (error == null) {
+            Time.sleep(SECOND_WAIT_TIME)
             UPDATE = true
             return
         }
-        if (TUI.getKBDKey(WAIT_TIME) == App.CONFIRMATION_KEY)
+        if (TUI.getKBDKey(WAIT_TIME) == App.CONFIRMATION_KEY){
             TUI.problemSolved()
+            App.REQUEST = null
+        }
         UPDATE = true
     }
 
@@ -106,7 +111,7 @@ object Maintenance {
      */
     private fun updateProduct(mode: App.Mode) {
         val product = App.pickProduct(mode, Products.products, App.Operation.MAINTENANCE)
-        if (product == null){
+        if (product == null) {
             UPDATE = true
             return
         }
@@ -115,27 +120,29 @@ object Maintenance {
         do {
             TUI.printProductName(product)
             TUI.printUpdateQuantity(product)
-            var i = 0
+            var i = INIT_ITERATOR
             while (i < NUMBER_OF_INPUTS && intKey >= RESET_INT) {
                 key = TUI.getKBDKey(WAIT_TIME)
-                when (key) {
-                    TUI.NONE -> {
-                        UPDATE = true
-                        return
-                    }
-                    in App.KEY_INTERVAL -> {
-                        intKey = intKey * App.MULTIPLIER + key.toInteger()
-                        TUI.printInt(key, CURSOR_QUANTITY_INIT + i++)
-                    }
-                    ABORT_UPDATE_KEY -> {
-                        if (i == 0) {
-                            UPDATE = true
-                            return
+                if (key == TUI.NONE) {
+                    UPDATE = true
+                    return
+                } else {
+                    when (key) {
+                        in App.KEY_INTERVAL -> {
+                            intKey = intKey * App.MULTIPLIER + key.toInteger()
+                            TUI.printInt(key, CURSOR_QUANTITY_INIT + i++)
                         }
-                        else intKey = RESET_INT
-                        i--
+                        ABORT_UPDATE_KEY -> {
+                            if (i == INIT_ITERATOR) {
+                                UPDATE = true
+                                return
+                            } else {
+                                intKey = RESET_INT
+                                i--
+                            }
+                        }
+                        else -> i--
                     }
-                    else -> i--
                 }
             }
         } while (intKey > Products.MAXIMUM_QUANTITY)
@@ -151,7 +158,9 @@ object Maintenance {
      */
     private fun removeProduct(mode: App.Mode) {
         val product = App.pickProduct(mode, Products.products, App.Operation.MAINTENANCE) ?: return
-        Products.products[product.id] = null
+        TUI.printRemoveConfirmation(product)
+        if (TUI.getKBDKey(WAIT_TIME) == CONFIRMATION)
+            Products.products[product.id] = null
         UPDATE = true
     }
 

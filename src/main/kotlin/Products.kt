@@ -27,7 +27,6 @@ object Products {
      */
     data class Product(val id: Int, val name: String, var quantity: Int, val price: Int)
 
-
     /**
      * Function that initializes the class of the Products.
      * If it was already initialized exists the function.
@@ -38,7 +37,6 @@ object Products {
         products = vendingProducts()
         PRODUCTS_STATE = true
     }
-
 
     /**
      * Function that interprets an array of Strings from the [FileAccess] and
@@ -67,7 +65,6 @@ object Products {
         return products
     }
 
-
     /**
      * Function that saves the array of [Product] into a file for log.
      * @param array Array of Products to Store information.
@@ -81,17 +78,15 @@ object Products {
         FileAccess.writeProductFile(newArray)
     }
 
-
     /**
      * Function that adds quantity to a Product.
-     * @receiver Product to add [quantity].
-     * @param quantity quantity to add to a [Product].
+     * @receiver Product to add [newQuantity].
+     * @param newQuantity quantity to change to a [Product].
      * @return Returns the original product with the new quantity.
      */
-    fun Product.changeQuantity(quantity: Int): Product {
-        return this.copy(quantity = quantity)
+    fun Product.changeQuantity(newQuantity: Int): Product {
+        return this.copy(quantity = newQuantity)
     }
-
 }
 
 /**

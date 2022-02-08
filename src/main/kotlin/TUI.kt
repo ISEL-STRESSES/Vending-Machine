@@ -43,6 +43,10 @@ object TUI {
     private const val ARROW_CHAR_CODE = 1       // Char code for the arrow char in the LCD.
     private const val ARROW_CGRAM_POSITION = 1  // Arrow address in the CGRAM.
 
+    //------------------------------------------------------------------------------------------------------------------
+    private const val TIME_OUT = 5000L
+    private const val CONFIRMATION = '5'
+
     /**
      * Enumerate that Represents all the available positions in a line for writing in the LCD.
      */
@@ -213,7 +217,7 @@ object TUI {
         LCD.clear()
         printText("Vending Aborted", Position.CENTER, FIRST_LINE)
         if (coins > NO_COINS)
-            printText("Return $coins"+BITCOIN_CHAR_CODE.toChar(), Position.CENTER, SECOND_LINE)
+            printText("Return $coins" + BITCOIN_CHAR_CODE.toChar(), Position.CENTER, SECOND_LINE)
     }
 
     /**
@@ -221,11 +225,12 @@ object TUI {
      * @param option Option for printing in the LCD.
      * @param position Position for printing in an LCD line(Left, Center, Right).
      */
-    private fun printConfirmation(option: String, position: Position) {
+    private fun printConfirmation(option: String, position: Position): Boolean {
         LCD.clear()
         printText(option, position, FIRST_LINE)
         printText("5-Yes", Position.LEFT, SECOND_LINE)
         printText("other-No", Position.RIGHT, SECOND_LINE)
+        return getKBDKey(TIME_OUT) == CONFIRMATION
     }
 
     /**
@@ -260,6 +265,27 @@ object TUI {
     }
 
     /**
+     * TODO
+     */
+    fun printTextCentered(text: String, line: Int, column: Int = INITIAL_POSITION, clear: Boolean = false ){
+        printText(text, Position.CENTER, line, column, clear)
+    }
+
+    /**
+     * TODO
+     */
+    fun printTextLeft(text: String, line: Int, column: Int = INITIAL_POSITION, clear: Boolean = false) {
+        printText(text, Position.LEFT, line, column, clear)
+    }
+
+    /**
+     * TODO
+     */
+    fun printTextRight(text: String, line: Int, column: Int = INITIAL_POSITION, clear: Boolean = false) {
+        printText(text, Position.RIGHT, line, column, clear)
+    }
+
+    /**
      * Function that clears a line in the LCD.
      * @param line Line to be cleared.
      */
@@ -270,7 +296,6 @@ object TUI {
         LCD.cursor(line, FIRST_COLUMN)
         LCD.write(fill)
     }
-
 
     /**
      * Function that converts a Char to Integer.
@@ -319,7 +344,7 @@ object TUI {
     }
 
     /**
-     * Function that print the confirmation quest of the update product function.
+     * Function that prints the confirmation quest of the update product function.
      * @param product Product to print for confirmation.
      * @param intKey New quantity of a given product.
      */
@@ -337,6 +362,16 @@ object TUI {
         LCD.clear()
         printConfirmation("Shutdown", Position.CENTER)
     }
+
+    /**
+     * Function that prints the confirmation quest of the remove product function.
+     * @param product Product to print for confirmation.
+     */
+    fun printRemoveConfirmation(product: Products.Product) {
+        LCD.clear()
+        printConfirmation("Remove", Position.LEFT)
+        printText(product.name,Position.RIGHT, FIRST_LINE)
+    }
 }
 
 /**
@@ -346,61 +381,48 @@ fun main() {
     TUI.init()
     val product = Products.Product(1, "Jack Daniels", 2, 4)
     val currentTime = SimpleDateFormat("dd-MM-yyyy HH:mm").format(Time.getTimeInMillis())
-    TUI.printProduct(product)
-    Time.sleep(1000L)
-    LCD.clear()
-    TUI.printProduct(product, App.Mode.ARROWS)
-    Time.sleep(1000L)
-    LCD.clear()
-    TUI.printUnavailableProduct(null,7)
-    Time.sleep(1000L)
-    LCD.clear()
-    TUI.printProduct(product)
-    Time.sleep(1000L)
-    LCD.clear()
-    TUI.printOutOfService()
-    Time.sleep(1000L)
-    LCD.clear()
+    val waitTime = 1000L
     TUI.printUpdateQuantity(product)
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
-    for (i in 0..product.price){
-        TUI.printSell(product,product.price-i)
-        Time.sleep(1000L)
+    for (i in 0..product.price) {
+        TUI.printSell(product, product.price - i)
+        Time.sleep(waitTime)
         LCD.clear()
     }
     TUI.printTanks()
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
     TUI.printVendingMenu(currentTime)
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
     for (i in 0..4) {
         TUI.printMaintenanceMenu(arrayOf("Option1", "Option2", "Option3"), false)
-        Time.sleep(1000L)
+        Time.sleep(waitTime)
         LCD.clear()
     }
     TUI.printCollect(product)
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
     TUI.printMaintenanceSell(product)
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
     TUI.printCancel(3)
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
     TUI.printProblem("Something")
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
     TUI.problemSolved()
-    Time.sleep(1000L)
+    Time.sleep(waitTime)
     LCD.clear()
-    TUI.printInt(TUI.getKBDKey(10000L),0)
-    Time.sleep(1000L)
+    TUI.printInt(TUI.getKBDKey(waitTime*10), 0)
+    Time.sleep(waitTime)
     LCD.clear()
-    TUI.printUpdateConfirm(product,TUI.getKBDKey(1000L).toInteger())
-    Time.sleep(1000L)
+    TUI.printUpdateConfirm(product, TUI.getKBDKey(waitTime*10).toInteger())
+    Time.sleep(waitTime)
     LCD.clear()
     TUI.printShutdown()
+    Time.sleep(waitTime)
     exitProcess(0)
 }

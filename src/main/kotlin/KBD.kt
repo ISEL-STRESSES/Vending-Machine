@@ -15,7 +15,6 @@ object KBD {
     private var KEY_INTERVAL = INVALID_KEY_RANGE// Index interval of a valid key in [keys].
     const val NONE = 0.toChar()                 // Value that represents a non-existent key.
     private var KBD_STATE = false               // Current State of KBD(if it was already initialized).
-
     // keys that we can expect to read from the matrix keyboard (iterated by columns).
     private val keys = charArrayOf('1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#', NONE, NONE, NONE, NONE)
 
@@ -85,14 +84,12 @@ object KBD {
         //timeout
         return NONE
     }
-
 }
 
 /**
  * Main function for testing the class.
  */
 fun main() {
-    HAL.init()
     KBD.init()
 
     val timeout = 1000L

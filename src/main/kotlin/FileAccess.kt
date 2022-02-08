@@ -106,11 +106,12 @@ object FileAccess {
  * Main function for testing the class.
  */
 fun main() {
+    FileAccess.init()
     val productFile = FileAccess.readProductFile()
     productFile.forEach(::println)
     FileAccess.writeProductFile(productFile)
 
     val coinFile = FileAccess.readCoinFile()
     coinFile.forEach(::println)
-    FileAccess.writeProductFile(coinFile)
+    FileAccess.writeCoinFile(coinFile)
 }

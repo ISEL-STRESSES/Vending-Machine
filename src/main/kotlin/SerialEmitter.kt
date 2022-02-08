@@ -104,7 +104,6 @@ object SerialEmitter {
  * Main function for testing.
  */
 fun main() {
-    HAL.init()
     SerialEmitter.init()
 
     val data1 = 2
