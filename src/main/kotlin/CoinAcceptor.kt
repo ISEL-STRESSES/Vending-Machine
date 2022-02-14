@@ -34,16 +34,15 @@ object CoinAcceptor {
         return HAL.isBit(COIN_READ_MASK)
     }
 
-
     /**
      * Function that informs the Coin Acceptor that the coin was accounted for.
      */
     fun acceptCoin() {
         if (hasCoin()) {
             HAL.setBits(COIN_ACCEPT_MASK)
+            while (hasCoin());
         } else HAL.clrBits(COIN_ACCEPT_MASK)
         HAL.clrBits(COIN_ACCEPT_MASK)
-
     }
 
     /**

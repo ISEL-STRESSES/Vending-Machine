@@ -118,7 +118,6 @@ object LCD {
     fun init() {
         // Check if LCD interface was already initialized.
         if (LCD_STATE) return
-        HAL.init()
         SerialEmitter.init()
 
         // 8 bit data interface ------------

@@ -89,9 +89,9 @@ object Vending {
             if (coinsInserted == selectedProduct.price) {
                 TUI.printCollect(selectedProduct)
                 CoinAcceptor.collectCoins()
+                CoinDeposit.COINS += coinsInserted
                 Dispenser.dispense(selectedProduct.id)
                 Products.products[selectedProduct.id]!!.quantity--
-                CoinDeposit.COINS += coinsInserted
                 TUI.printTanks()
                 Time.sleep(TANKS_WAIT_TIME)
                 FORCE = true

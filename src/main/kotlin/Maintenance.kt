@@ -11,7 +11,7 @@ import kotlin.system.exitProcess    // Terminating the Application.
 object Maintenance {
     //Variable initialization.
     private const val WAIT_TIME = 5000L             // Default wait time for getting an KBD key.
-    private const val SECOND_WAIT_TIME = 2000L      // Second wait time for adding some delay to the program
+    private const val FAST_WAIT_TIME = 2000L      // Second wait time for adding some delay to the program
     private const val NORMAL_EXIT_CODE = 0          // Normal exit code when closing the application.
     private const val CONFIRMATION = '5'            // Confirmation key for closing the application.
     private const val DISPENSE_TEST = '1'           // Dispense test selector key.
@@ -64,7 +64,6 @@ object Maintenance {
      */
     private fun printMaintenance(update: Boolean) {
         TUI.printMaintenanceMenu(OPTIONS, update)
-        Time.sleep(SECOND_WAIT_TIME)
         UPDATE = false
     }
 
@@ -76,7 +75,7 @@ object Maintenance {
     fun run(mode: App.Mode, error: String?) {
         printMaintenance(UPDATE)
         var key: Char
-        while (TUI.getKBDKey(App.FAST_TIME).also { key = it } != TUI.NONE) {
+        while (TUI.getKBDKey(FAST_WAIT_TIME).also { key = it } != TUI.NONE) {
             when (key) {
                 DISPENSE_TEST -> dispenseTest(mode)
                 UPDATE_PRODUCT -> updateProduct(mode)
@@ -94,7 +93,7 @@ object Maintenance {
     private fun problems(error: String?) {
         TUI.printProblem(error)
         if (error == null) {
-            Time.sleep(SECOND_WAIT_TIME)
+            Time.sleep(FAST_WAIT_TIME)
             UPDATE = true
             return
         }

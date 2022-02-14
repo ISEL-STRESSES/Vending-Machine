@@ -10,7 +10,7 @@ import kotlin.system.exitProcess
  */
 object TUI {
     //Variable Initialization.
-    private const val LINE_SIZE = 64            // Max line size in the LCD(Addresses).
+    private const val LINE_SIZE = 32            // Max line size in the LCD(Addresses).
     private const val INITIAL_POSITION = 0      // Initial cell position on any line.
     private const val FIRST_LINE = 0            // First Line in the LCD.
     private const val SECOND_LINE = 1           // Second Line in the LCD.
@@ -225,7 +225,14 @@ object TUI {
      * @param option Option for printing in the LCD.
      * @param position Position for printing in an LCD line(Left, Center, Right).
      */
-    private fun printConfirmation(option: String, position: Position): Boolean {
+    private fun printConfirmation(option: String, position: Position) {
+        LCD.clear()
+        printText(option, position, FIRST_LINE)
+        printText("5-Yes", Position.LEFT, SECOND_LINE)
+        printText("other-No", Position.RIGHT, SECOND_LINE)
+    }
+    //-----------------------------------------------------------------
+    private fun printConfirmation2(option: String, position: Position): Boolean {
         LCD.clear()
         printText(option, position, FIRST_LINE)
         printText("5-Yes", Position.LEFT, SECOND_LINE)
