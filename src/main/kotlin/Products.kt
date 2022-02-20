@@ -7,14 +7,14 @@ import Products.changeQuantity
  */
 object Products {
     //Variable Initialization.
-    private const val MACHINE_MAX_SIZE = 16                         // Vending machine max capacity for products
+    private const val MACHINE_MAX_SIZE = 32                         // Vending machine max capacity for products
     var products: Array<Product?> = arrayOfNulls(MACHINE_MAX_SIZE)  // Log of the Product file.
     private const val ID_INDEX = 0                                  // Index of the ID field in the file String.
     private const val NAME_INDEX = 1                                // Index of the name field in the file String.
     private const val QUANTITY_INDEX = 2                            // Index of the quantity field in the file String.
     private const val PRICE_INDEX = 3                               // Index of the price field in the file String.
     const val MINIMUM_QUANTITY = 0                                  // Product minimum quantity available.
-    const val MAXIMUM_QUANTITY = 20                                 // Product maximum quantity available.
+    const val MAXIMUM_QUANTITY = 200                                 // Product maximum quantity available.
     private const val DELIMITER = ';'                               // Delimiter of the file String.
     private var PRODUCTS_STATE = false                              // Current State of Products(if it was already initialized).
 

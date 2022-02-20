@@ -5,7 +5,6 @@
 5;Chips-Ahoy;12;5
 6;Candies;4;3
 7;Cheese Sandwich;20;2
-8;Ham Sandwich;4;2
 9;Club Sandwich;3;3
 10;Fantastic;7;5
 11;Coca-Cola;9;5

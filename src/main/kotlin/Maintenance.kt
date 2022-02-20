@@ -21,7 +21,7 @@ object Maintenance {
     private const val PROBLEMS = '5'                // Problems Selector key.
     private const val MAINTENANCE_MONEY = '*'       // Money for testing the dispense mode.
     private const val ABORT_UPDATE_KEY = '*'        // Clean and Abort key in update product.
-    private const val NUMBER_OF_INPUTS = 2          // Number of keys to get for updating a product quantity.
+    private const val NUMBER_OF_INPUTS = 3          // Number of keys to get for updating a product quantity.
     private const val CURSOR_QUANTITY_INIT = 4      // Cursor position for printing new quantity into the LCD.
     private const val RESET_INT = 0                 // Value to overwrite an Integer key.
     private const val INIT_ITERATOR = 0             // Initial iterator when capturing several keys.
